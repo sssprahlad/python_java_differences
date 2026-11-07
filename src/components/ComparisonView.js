@@ -7,6 +7,7 @@ function ComparisonView({ topic, leftLabel, rightLabel, leftColor, rightColor, o
       <header className="topic-header">
         <h2>{topic.title}</h2>
         <p className="topic-learn">🎯 {topic.learn}</p>
+        <button style={{ marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: '#007bff', color: 'white', cursor: 'pointer' }} onClick={() => window.location.reload()}>Back to Home</button>
       </header>
 
       <div className="compare-columns">

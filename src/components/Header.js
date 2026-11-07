@@ -4,7 +4,7 @@ function Header({ query, onQueryChange, theme, onToggleTheme }) {
   return (
     <header className="app-header">
       <div className="header-brand">
-        <span className="brand-icon">&lt;/&gt;</span>
+        <span onClick={() => window.location.reload()} className="brand-icon">&lt;/&gt;</span>
         <div>
           <h1 className="brand-title">Python ⇄ Java Playground</h1>
           <p className="brand-sub">Learn both languages side by side — with Spring Boot &amp; Django</p>
