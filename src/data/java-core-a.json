@@ -1,0 +1,270 @@
+{
+  "section": {
+    "id": "java-core-a",
+    "title": "Java Core — JVM, Types & Syntax",
+    "subtitle": "JDK/JRE/JVM, memory areas, garbage collection, data types, type conversion, operators, strings, arrays, comments, exceptions and more."
+  },
+  "leftLabel": "Python",
+  "rightLabel": "Java",
+  "leftColor": "#3776ab",
+  "rightColor": "#b07219",
+  "topics": [
+    {
+      "id": "jdk-jre-jvm",
+      "title": "JDK, JRE & JVM",
+      "learn": "What JDK, JRE and JVM are and how Java code runs.",
+      "python": {
+        "definition": "Python has no JVM. The Python interpreter reads .py files directly (or compiles to .pyc bytecode). You install one 'python' package — that's it.",
+        "code": "# Python: interpreter executes source directly\npython3 script.py\n\n# CPython compiles to bytecode in __pycache__/\n# No separate JDK/JRE/JVM concept"
+      },
+      "java": {
+        "definition": "JDK = development kit (compiler javac + tools). JRE = runtime (JVM + libraries, runs compiled code). JVM = virtual machine that executes bytecode (.class). javac compiles .java -> .class, java runs it.",
+        "code": "// 1. javac Main.java   -> Main.class (bytecode)\n// 2. java Main          -> JVM executes bytecode\n\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello JVM\");\n    }\n}\n// JDK ⊃ JRE ⊃ JVM  (each contains the next)"
+      },
+      "resources": [
+        { "label": "JVM Internals", "url": "https://docs.oracle.com/javase/specs/jvms/se17/html/" }
+      ]
+    },
+    {
+      "id": "memory-gc",
+      "title": "Memory Areas & Garbage Collection",
+      "learn": "Static/dynamic memory, JVM memory regions, and how GC works (mark-sweep-compact).",
+      "python": {
+        "definition": "Python objects live on the heap, managed by CPython's reference counting + cyclic GC. No manual memory management; 'static' doesn't exist the same way.",
+        "code": "import gc\n\nx = [1, 2, 3]      # heap object\ndel x               # refcount -> 0, freed (maybe)\ngc.collect()        # force cyclic GC\nprint(gc.get_count())"
+      },
+      "java": {
+        "definition": "JVM memory: Method Area (class metadata), Heap (objects — dynamic), Stack (per-thread method calls), PC Register, Native Method Stack. GC algorithms: Mark-Sweep (mark live, sweep dead), Mark-Sweep-Compact (also defragments).",
+        "code": "public class Main {\n    static int count = 0;        // static -> Method/Static area\n    public static void main(String[] args) {\n        int local = 5;             // stack (per-thread)\n        String s = new String(\"hi\"); // heap object\n        s = null;                  // now unreachable -> GC eligible\n        System.gc();               // hint: run GC\n    }\n}\n// GC: 1) Mark reachable objects 2) Sweep unmarked 3) Compact heap"
+      },
+      "resources": [
+        { "label": "Java Memory Model", "url": "https://docs.oracle.com/javase/specs/jls/se17/html/jls-17.html" }
+      ]
+    },
+    {
+      "id": "datatype-sizes",
+      "title": "Data Types & Memory Sizes",
+      "learn": "Primitive vs non-primitive types and how many bytes each takes.",
+      "python": {
+        "definition": "Everything is an object. int/float are arbitrary precision (no fixed size). sys.getsizeof() shows bytes. bool, str, list, dict, tuple, set are the built-ins.",
+        "code": "import sys\n\nprint(sys.getsizeof(10))        # 28 bytes (small int, cached)\nprint(sys.getsizeof(10**30))   # ~36 bytes (big int)\nprint(sys.getsizeof(3.14))     # 24 bytes (float)\nprint(sys.getsizeof(\"hi\"))    # 50 bytes (str object)\nprint(sys.getsizeof([1,2,3]))   # 88 bytes + elements\n\n# type check\nprint(type(10), type(\"x\"), type([1]))"
+      },
+      "java": {
+        "definition": "Primitives have FIXED sizes: byte=1, short=2, char=2, int=4, long=8, float=4, double=8, boolean=1 (theoretical). Non-primitives (String, arrays, objects) live on heap. Check type with instanceof.",
+        "code": "// Sizes: byte 1 | short 2 | char 2 | int 4 | long 8 | float 4 | double 8\nint i = 10;            // 4 bytes\nlong big = 10L;        // 8 bytes\ndouble d = 3.14;       // 8 bytes\n\nObject obj = \"hi\";   // heap reference\nSystem.out.println(obj instanceof String); // true\n\n// Check exact type\nif (obj.getClass() == String.class) ..."
+      },
+      "resources": [
+        { "label": "Python — sys.getsizeof", "url": "https://docs.python.org/3/library/sys.html#sys.getsizeof" },
+        { "label": "Java — Primitive Types", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" }
+      ]
+    },
+    {
+      "id": "type-conversion",
+      "title": "Type Conversion, Casting & Boxing",
+      "learn": "Primitive widening, upcasting/downcasting, automatic type promotion, boxing/unboxing.",
+      "python": {
+        "definition": "Python is dynamically typed — no casting needed, any variable holds any type. int()/float()/str() convert explicitly. No primitive/wrapper split.",
+        "code": "x = 10          # int\nx = \"hello\"    # now str — totally fine\n\n# Explicit conversion\na = int(\"42\")\nb = float(a)\nc = str(b)\n\n# Duck typing: just use it\nprint(len(\"abc\"))     # works on str\n# print(len(10))        # TypeError — no len() for int"
+      },
+      "java": {
+        "definition": "Widening (implicit): byte->short->int->long->float->double. Narrowing needs cast. Upcasting: subclass->superclass (safe). Downcasting: needs explicit cast + instanceof check. Boxing: int->Integer; unboxing: Integer->int (autoboxing is automatic).",
+        "code": "int i = 100;\nlong l = i;              // widening: automatic\ndouble d = l;           // widening\n\nint n = (int) 3.99;     // narrowing cast -> 3\n\n// Boxing & unboxing (automatic)\nInteger boxed = i;      // autoboxing\nint unboxed = boxed;    // auto-unboxing\n\n// Up/down casting\nAnimal a = new Dog();   // upcast\nDog dog = (Dog) a;      // downcast (needs check)\nif (a instanceof Dog) dog = (Dog) a;"
+      },
+      "resources": [
+        { "label": "Java — Type Conversion", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" },
+        { "label": "Java — Casting", "url": "https://docs.oracle.com/javase/specs/jls/se17/html/jls-5.html" }
+      ]
+    },
+    {
+      "id": "operators-deep",
+      "title": "Operators — Unary, Ternary, Switch & Precedence",
+      "learn": "All operator types including BODMAS/precedence order.",
+      "python": {
+        "definition": "Unary: -x, not x, +x. Ternary: a if cond else b. switch statement (3.10+): match/case. Precedence (high->low): (), [], {}, **, unary, *,/,//,%, +,-, shifts, &, ^, |, comparisons, not, and, or.",
+        "code": "x = 5\nprint(-x, not False)                    # unary\n\n# Ternary\nstatus = \"adult\" if x >= 18 else \"minor\"\n\n# Precedence demo (BODMAS)\nprint(2 + 3 * 4)          # 14 — * before +\nprint((2 + 3) * 4)        # 20 — parens first\nprint(2 ** 3 ** 2)        # 512 — ** right-assoc\n\n# Switch (3.10+)\nmatch x:\n    case 1: print(\"one\")\n    case _: print(\"other\")"
+      },
+      "java": {
+        "definition": "Unary: -x, !x, ++x. Ternary: cond ? a : b. switch expression with -> and yield (Java 14+). Precedence: (), [], ., unary, */%, +-, shifts, relational, ==/!=, &, ^, |, &&, ||, ternary, assignment.",
+        "code": "int x = 5;\nSystem.out.println(-x + \" \" + !true);   // unary\n\n// Ternary\nString status = x >= 18 ? \"adult\" : \"minor\";\n\n// Precedence (same BODMAS)\nSystem.out.println(2 + 3 * 4);   // 14\nSystem.out.println((2 + 3) * 4); // 20\n\n// Switch expression with yield\nint day = switch (x) {\n    case 1 -> 10;\n    case 5 -> { yield 50; }   // yield returns value\n    default -> 0;\n};"
+      },
+      "resources": [
+        { "label": "Python — Operator precedence", "url": "https://docs.python.org/3/reference/expressions.html#operator-precedence" },
+        { "label": "Java — Operators", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html" }
+      ]
+    },
+    {
+      "id": "string-pool",
+      "title": "String Pool & Immutability",
+      "learn": "How strings are stored, why String is immutable, StringBuilder vs StringBuffer.",
+      "python": {
+        "definition": "Python interns some strings automatically. Strings are immutable — every 'change' creates a new object. No StringBuilder; use ''.join() or f-strings for building.",
+        "code": "a = \"hello\"\nb = \"hello\"\nprint(a is b)          # True — interned!\n\nc = \"hello \" + \"world\"   # new object\n\n# Build strings efficiently\nparts = [str(i) for i in range(1000)]\ns = \"\".join(parts)         # fast — join once"
+      },
+      "java": {
+        "definition": "String literals go to the String Pool — identical literals share one object. new String() forces heap copy. Immutability = thread-safe + cacheable hashCode. StringBuilder = fast mutable (not thread-safe); StringBuffer = synchronized version.",
+        "code": "String a = \"hello\";\nString b = \"hello\";\nSystem.out.println(a == b);            // true (== works: same pool object)\nString c = new String(\"hello\");\nSystem.out.println(a.equals(c));        // true (value)\nSystem.out.println(a == c);             // FALSE!\n\n// Building strings\nStringBuilder sb = new StringBuilder();\nfor (int i = 0; i < 1000; i++) sb.append(i);\nString result = sb.toString();\n// StringBuffer = same but thread-safe (synchronized)"
+      },
+      "resources": [
+        { "label": "Java — String Pool", "url": "https://docs.oracle.com/javase/specs/jls/se17/html/jls-3.html#jls-3.10.5" }
+      ]
+    },
+    {
+      "id": "string-methods",
+      "title": "String Methods — Both Languages",
+      "learn": "Common string operations side by side.",
+      "python": {
+        "definition": "Python string methods return NEW strings (immutable). Key methods: lower, upper, strip, split, join, replace, find/index, startswith, count, format.",
+        "code": "s = \"  Hello World  \"\n\ns.lower()          # '  hello world  '\ns.upper()          # '  HELLO WORLD  '\ns.strip()          # 'Hello World'\ns.split()          # ['Hello', 'World']\ns.replace('World','Py')\ns.find('World')    # index or -1\ns.startswith('Hel')\n','.join(['a','b']) # 'a,b'\n\n# char access\ns[0]               # 'H'\nlen(s)             # length"
+      },
+      "java": {
+        "definition": "Java String methods also return new Strings. Key methods: toLowerCase, toUpperCase, trim/strip, split, String.join, replace, indexOf, startsWith, formatted/format.",
+        "code": "String s = \"  Hello World  \";\n\ns.toLowerCase()    // \"  hello world  \"\ns.toUpperCase()    // \"  HELLO WORLD  \"\ns.trim()           // \"Hello World\"\ns.split(\" \")       // [Hello, World]\ns.replace(\"World\",\"Java\")\ns.indexOf(\"World\")  // index or -1\ns.startsWith(\"Hel\")\nString.join(\",\", \"a\",\"b\") // \"a,b\"\n\ns.charAt(0)        // 'H'\ns.length()         // length\ns.isEmpty()        // boolean"
+      },
+      "resources": []
+    },
+    {
+      "id": "character-unicode",
+      "title": "Character Methods & Unicode",
+      "learn": "Working with individual characters and Unicode ranges.",
+      "python": {
+        "definition": "Python strings are Unicode by default. ord() -> code point, chr() -> char. str.isalpha(), isdigit(), isalnum() classify characters.",
+        "code": "ch = 'A'\nprint(ord(ch))        # 65 (ASCII)\nprint(chr(66))       # 'B'\nprint('€'.encode())  # b'\\xe2\\x82\\xac' UTF-8\n\nfor c in 'aB3!':\n    print(c, c.isalpha(), c.isdigit(), c.isalnum())\n# 'a' True False True\n# '3' False True True\n# '!' False False False"
+      },
+      "java": {
+        "definition": "char = 16-bit UTF-16 code unit. Character class has static methods: isLetter, isDigit, isLetterOrDigit, isUpperCase, toLowerCase. Unicode escapes: \\u0041 = 'A'.",
+        "code": "char ch = 'A';\nSystem.out.println((int) ch);          // 65\nSystem.out.println((char) 66);         // 'B'\nSystem.out.println('\\u20AC');           // '€' Euro sign\n\nfor (char c : \"aB3!\".toCharArray()) {\n    System.out.println(c + \" \" +\n        Character.isLetter(c) + \" \" +\n        Character.isDigit(c));\n}\n// supplementary chars: use codePointAt / Character.toChars"
+      },
+      "resources": [
+        { "label": "Python — Unicode HOWTO", "url": "https://docs.python.org/3/howto/unicode.html" },
+        { "label": "Java — Character", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/Character.html" }
+      ]
+    },
+    {
+      "id": "arrays",
+      "title": "Creating Arrays — Both Languages",
+      "learn": "Array declaration, types of arrays (1D, 2D, jagged).",
+      "python": {
+        "definition": "Python has no fixed arrays — lists serve that role. Nested lists = 2D arrays; lists of different lengths = jagged. NumPy for real arrays.",
+        "code": "# 1D\narr = [1, 2, 3, 4]\n\n# 2D (matrix)\nmatrix = [[1, 2, 3], [4, 5, 6]]\nprint(matrix[1][2])     # 6\n\n# Jagged (rows of different length)\njagged = [[1, 2], [3], [4, 5, 6]]\nprint(jagged[2][1])     # 5\n\n# NumPy real arrays\nimport numpy as np\na = np.array([[1,2],[3,4]])\nprint(a.shape)          # (2, 2) fixed-size"
+      },
+      "java": {
+        "definition": "Arrays are fixed-size, typed objects. 1D: int[]. 2D: int[][]. Jagged: rows can differ. Length via .length. Enhanced for-loop iterates.",
+        "code": "int[] arr = {1, 2, 3, 4};\nint[] arr2 = new int[5];      // size 5, zeros\n\n// 2D\nint[][] matrix = {{1,2,3},{4,5,6}};\nSystem.out.println(matrix[1][2]);   // 6\n\n// Jagged\nint[][] jagged = {{1,2},{3},{4,5,6}};\nSystem.out.println(jagged[2][1]);   // 5\n\nfor (int x : arr) System.out.print(x);\nSystem.out.println(arr.length);    // 4"
+      },
+      "resources": [
+        { "label": "Python — Lists", "url": "https://docs.python.org/3/tutorial/datastructures.html" },
+        { "label": "Java — Arrays", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/arrays.html" }
+      ]
+    },
+    {
+      "id": "comments",
+      "title": "Types of Comments",
+      "learn": "Single-line, multi-line and documentation comments.",
+      "python": {
+        "definition": "# single-line. \"\"\"docstring\"\"\" = documentation (module/class/function doc). No true block comment — consecutive # lines used.",
+        "code": "# Single line comment\nx = 10  # inline comment\n\n\"\"\"Module docstring — describes this file.\"\"\"\n\ndef add(a, b):\n    \"\"\"Function docstring — shown by help(add).\"\"\"\n    return a + b\n\n# Multi-line = just multiple # lines\n# line 1\n# line 2"
+      },
+      "java": {
+        "definition": "// single-line, /* */ multi-line block, /** */ Javadoc documentation (generates API docs).",
+        "code": "// Single line comment\nint x = 10; // inline\n\n/* Multi-line\n   block comment\n   spans lines */\n\n/** Javadoc — documents the method for API docs */\npublic class Main {\n    /** Adds two numbers. */\n    static int add(int a, int b) { return a + b; }\n}"
+      },
+      "resources": [
+        { "label": "Java — Documentation comments", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/doccomments.html" }
+      ]
+    },
+    {
+      "id": "increment-decrement",
+      "title": "Pre & Post Increment (++/--)",
+      "learn": "Difference between ++a and a++.",
+      "python": {
+        "definition": "Python has no ++ operator — use += 1 / -= 1. No pre/post distinction exists.",
+        "code": "a = 5\na += 1        # same as a++ in Java\na -= 1        # same as a--\n\n# No ++a or a++ in Python — SyntaxError\n# b = a++ would fail"
+      },
+      "java": {
+        "definition": "++a (pre): increment FIRST, then use new value. a++ (post): use OLD value, then increment. -- works the same downward.",
+        "code": "int a = 5;\nSystem.out.println(a++);   // prints 5, a becomes 6\nSystem.out.println(++a);   // a becomes 7, prints 7\nSystem.out.println(a--);   // prints 7, a becomes 6\nSystem.out.println(--a);   // a becomes 5, prints 5\n\n// Compound assignment (equivalent)\nint b = a; a += 1;   // like post-increment\nint c = (a += 1);   // like pre-increment"
+      },
+      "resources": []
+    },
+    {
+      "id": "constructors",
+      "title": "Constructors & this/super Keywords",
+      "learn": "Default vs explicit constructors; this and super.",
+      "python": {
+        "definition": "__init__ is the constructor — runs on object creation. self = this (current instance). super() calls parent constructor/method. No default constructor concept — __init__ always exists.",
+        "code": "class Animal:\n    def __init__(self, name):\n        self.name = name          # self = 'this'\n\nclass Dog(Animal):\n    def __init__(self, name, breed):\n        super().__init__(name)   # super() = parent ctor\n        self.breed = breed\n\n    def speak(self):\n        return super().speak() + \" Woof!\"  # call parent method"
+      },
+      "java": {
+        "definition": "Constructor = method named after class, no return type. Default ctor auto-created if none defined. this = current instance; super = parent class. super() must be first statement.",
+        "code": "class Animal {\n    String name;\n    Animal(String name) { this.name = name; }  // 'this'\n    String speak() { return \"...\"; }\n}\n\nclass Dog extends Animal {\n    String breed;\n    Dog(String name, String breed) {\n        super(name);              // parent constructor\n        this.breed = breed;\n    }\n    @Override String speak() {\n        return super.speak() + \" Woof!\";  // parent method\n    }\n}\n// No ctor? Java adds default: Dog() { super(); }"
+      },
+      "resources": [
+        { "label": "Java — Constructors", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/constructors.html" }
+      ]
+    },
+    {
+      "id": "static-blocks",
+      "title": "Static & Instance Blocks",
+      "learn": "Initialization blocks that run at class load / object creation.",
+      "python": {
+        "definition": "No static/instance blocks. Class-level code runs at definition time; __init__ runs per instance; __new__ before __init__.",
+        "code": "class Config:\n    # 'class body' runs ONCE at class definition\n    DEFAULT_PORT = 8080\n    cache = {}\n\n    def __init__(self, host):\n        # runs EVERY time an object is created\n        self.host = host\n\n# Module-level code also runs once on import\nprint(\"module loaded\")"
+      },
+      "java": {
+        "definition": "static {} block runs ONCE when class loads (before any object). Instance {} block runs before constructor on EVERY new object. Order: static block -> instance block -> constructor.",
+        "code": "public class Main {\n    static int x;\n\n    static {              // runs once, class load\n        x = 10;\n        System.out.println(\"static block\");\n    }\n\n    {                    // runs per object, before ctor\n        System.out.println(\"instance block\");\n    }\n\n    Main() { System.out.println(\"constructor\"); }\n\n    public static void main(String[] a) {\n        new Main();  // prints: static block / instance block / constructor\n    }\n}"
+      },
+      "resources": [
+        { "label": "Java — Initialization blocks", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/initial.html" }
+      ]
+    },
+    {
+      "id": "access-modifiers",
+      "title": "Access Modifiers",
+      "learn": "public, protected, private, default — controlling visibility.",
+      "python": {
+        "definition": "No access modifiers — everything is public by convention. _name = 'internal use', __name = name-mangled 'private-ish'. __all__ controls import *.",
+        "code": "class Bank:\n    def __init__(self):\n        self.public = 1        # accessible anywhere\n        self._protected = 2     # convention: internal\n        self.__private = 3      # name-mangled -> _Bank__private\n\nb = Bank()\nprint(b.public, b._protected)\nprint(b._Bank__private)   # can still reach it (no real privacy)"
+      },
+      "java": {
+        "definition": "private = class only; default (no modifier) = same package; protected = package + subclasses; public = everywhere. Enforced at compile time.",
+        "code": "public class Example {\n    private int a;        // this class only\n    int b;                // same package\n    protected int c;      // package + subclasses\n    public int d;         // everywhere\n}\n\n// Access from outside -> compile error:\n// new Example().a = 5;  // ERROR: a is private"
+      },
+      "resources": [
+        { "label": "Java — Access Control", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html" }
+      ]
+    },
+    {
+      "id": "pojo-serialization",
+      "title": "POJO Classes & Serialization",
+      "learn": "Plain Old Java Objects and saving objects to files/streams.",
+      "python": {
+        "definition": "Any class instance can be pickled (serialized) with pickle module — converts object to bytes for storage/network. __dict__ holds attributes.",
+        "code": "import pickle\n\nclass Student:\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n\ns = Student(\"Priya\", 20)\n\n# Serialize -> bytes/file\nwith open(\"student.pkl\", \"wb\") as f:\n    pickle.dump(s, f)\n\n# Deserialize\nwith open(\"student.pkl\", \"rb\") as f:\n    s2 = pickle.load(f)\nprint(s2.name, s2.age)"
+      },
+      "java": {
+        "definition": "POJO = plain class: private fields, public getters/setters, no-arg ctor, implements Serializable for object->byte[] conversion (ObjectOutputStream).",
+        "code": "import java.io.*;\n\npublic class Student implements Serializable {\n    private String name;\n    private int age;\n    public Student() {}                     // no-arg ctor\n    public String getName() { return name; } // getters\n    public void setName(String n) { name = n; }\n    // ... setters, equals, hashCode, toString\n}\n\n// Serialize\nObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(\"s.ser\"));\noos.writeObject(new Student());\n// Deserialize\nObjectInputStream ois = new ObjectInputStream(new FileInputStream(\"s.ser\"));\nStudent s = (Student) ois.readObject();"
+      },
+      "resources": [
+        { "label": "Java — Serialization", "url": "https://docs.oracle.com/javase/tutorial/jndi/objects/serial.html" }
+      ]
+    },
+    {
+      "id": "exception-deep",
+      "title": "Exceptions — try/catch/throws/throw/finally/finalize",
+      "learn": "Full exception handling including checked vs unchecked, stack traces, and deprecated finalize().",
+      "python": {
+        "definition": "try/except/else/finally. raise throws, except catches. All exceptions inherit Exception — no checked/unchecked split (though some like KeyboardInterrupt inherit BaseException). __del__ ~ finalize (deprecated).",
+        "code": "def divide(a, b):\n    if b == 0:\n        raise ZeroDivisionError(\"b cannot be 0\")  # throw\n    return a / b\n\ntry:\n    divide(10, 0)\nexcept ZeroDivisionError as e:\n    print(\"Caught:\", e)\nfinally:\n    print(\"always runs\")\n\n# Stack trace = traceback (automatic)\n# import traceback; traceback.print_exc()"
+      },
+      "java": {
+        "definition": "try/catch/finally; throw throws an exception object; throws declares checked exceptions a method may raise. Checked (IOException) MUST be handled; unchecked (RuntimeException) optional. printStackTrace() prints trace; finalize() deprecated -> try-with-resources.",
+        "code": "void divide(int a, int b) {\n    if (b == 0) throw new ArithmeticException(\"b is 0\");  // throw\n}\n\nvoid readFile() throws IOException {   // throws = declares checked exc\n    new FileReader(\"f.txt\");\n}\n\ntry {\n    divide(10, 0);\n    readFile();\n} catch (ArithmeticException | IOException e) {  // multi-catch\n    e.printStackTrace();    // the 'stacktrace'\n} finally {\n    System.out.println(\"always\");\n}\n// @Deprecated protected void finalize() — don't use, use try-with-resources"
+      },
+      "resources": [
+        { "label": "Java — Exceptions", "url": "https://docs.oracle.com/javase/tutorial/essential/exceptions/" }
+      ]
+    }
+  ]
+}

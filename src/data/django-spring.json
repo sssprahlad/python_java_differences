@@ -1,0 +1,352 @@
+{
+  "section": {
+    "id": "django-spring",
+    "title": "Django vs Spring Boot",
+    "subtitle": "Framework basics, structure, URLs/views, models, ORM, migrations, admin, forms, auth, middleware, REST APIs, JWT, permissions, pagination and testing."
+  },
+  "leftLabel": "Django",
+  "rightLabel": "Spring Boot",
+  "leftColor": "#0c4b33",
+  "rightColor": "#6db33f",
+  "topics": [
+    {
+      "id": "framework-intro",
+      "title": "Framework Introduction",
+      "learn": "What each framework is for.",
+      "python": {
+        "definition": "Django is a high-level Python web framework with 'batteries included' — ORM, admin, auth, templating built in. MTV pattern (Model-Template-View).",
+        "code": "pip install django\ndjango-admin startproject mysite\ncd mysite\npython manage.py startapp polls\npython manage.py runserver\n# http://127.0.0.1:8000"
+      },
+      "java": {
+        "definition": "Spring Boot is a Java framework on the Spring ecosystem — auto-configuration, embedded server, dependency injection. MVC pattern.",
+        "code": "// start.spring.io -> Spring Initializr\n// dependencies: Spring Web, Spring Data JPA\n\n@SpringBootApplication\npublic class MyApp {\n    public static void main(String[] args) {\n        SpringApplication.run(MyApp.class, args);\n    }\n}"
+      },
+      "resources": [
+        { "label": "Django docs", "url": "https://docs.djangoproject.com/" },
+        { "label": "Spring Boot docs", "url": "https://docs.spring.io/spring-boot/" }
+      ]
+    },
+    {
+      "id": "project-structure",
+      "title": "Project & App Structure",
+      "learn": "How each framework organises code.",
+      "python": {
+        "definition": "Project = settings/urls/wsgi. Apps = reusable modules with models.py, views.py, urls.py, admin.py, migrations/.",
+        "code": "mysite/\n  manage.py\n  mysite/         # project config\n    settings.py\n    urls.py\n  polls/          # app\n    models.py\n    views.py\n    urls.py\n    admin.py\n    migrations/"
+      },
+      "java": {
+        "definition": "Maven/Gradle project: src/main/java (packages by feature/layer), src/main/resources (application.properties), src/test/java.",
+        "code": "myapp/\n  pom.xml\n  src/main/java/com/example/\n    MyApp.java\n    controller/   # REST endpoints\n    service/      # business logic\n    repository/   # DB access\n    model/        # entities\n  src/main/resources/\n    application.properties"
+      },
+      "resources": []
+    },
+    {
+      "id": "urls-views",
+      "title": "URLs & Views",
+      "learn": "Request handling — mapping URLs to code.",
+      "python": {
+        "definition": "urls.py maps URL patterns to view functions; views receive HttpRequest and return HttpResponse (or render templates / JsonResponse).",
+        "code": "# urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path(\"students/\", views.student_list),\n    path(\"students/<int:id>/\", views.student_detail),\n]\n\n# views.py\ndef student_list(request):\n    return JsonResponse({\"students\": []})"
+      },
+      "java": {
+        "definition": "@RestController + @GetMapping/@PostMapping handle requests; methods return objects serialised to JSON automatically.",
+        "code": "@RestController\n@RequestMapping(\"/students\")\npublic class StudentController {\n    @GetMapping\n    public List<Student> list() { return service.findAll(); }\n\n    @GetMapping(\"/{id}\")\n    public Student get(@PathVariable Long id) { return service.findById(id); }\n}"
+      },
+      "resources": [
+        { "label": "Django — Views", "url": "https://docs.djangoproject.com/en/stable/topics/http/views/" },
+        { "label": "Spring — @RestController", "url": "https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html" }
+      ]
+    },
+    {
+      "id": "models",
+      "title": "Models — Database Structure",
+      "learn": "Defining database tables as code.",
+      "python": {
+        "definition": "models.Model subclasses map to tables; each field (CharField, IntegerField...) maps to a column. Django generates the SQL.",
+        "code": "from django.db import models\n\nclass Student(models.Model):\n    name = models.CharField(max_length=100)\n    age = models.IntegerField()\n    email = models.EmailField(unique=True)\n    created_at = models.DateTimeField(auto_now_add=True)"
+      },
+      "java": {
+        "definition": "JPA @Entity classes map to tables; @Id marks the primary key; fields map to columns.",
+        "code": "@Entity\n@Table(name = \"students\")\npublic class Student {\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;\n    private String name;\n    private int age;\n    private String email;\n    // getters & setters\n}"
+      },
+      "resources": [
+        { "label": "Django — Models", "url": "https://docs.djangoproject.com/en/stable/topics/db/models/" },
+        { "label": "JPA — Entities", "url": "https://jakarta.ee/specifications/persistence/" }
+      ]
+    },
+    {
+      "id": "orm",
+      "title": "ORM — Database Operations",
+      "learn": "Querying the database through objects instead of raw SQL.",
+      "python": {
+        "definition": "Django ORM: Model.objects.all()/.get()/.filter()/.create() — returns QuerySets, lazy-evaluated.",
+        "code": "# Query\nStudent.objects.all()\nStudent.objects.get(id=1)\nStudent.objects.filter(age__gte=18).order_by(\"name\")\n\n# Create / update / delete\nStudent.objects.create(name=\"Priya\", age=20)\ns.name = \"P\"; s.save()\ns.delete()"
+      },
+      "java": {
+        "definition": "Spring Data JPA repositories — extend JpaRepository to get CRUD methods free; or use EntityManager/JPQL.",
+        "code": "public interface StudentRepository extends JpaRepository<Student, Long> {\n    List<Student> findByAgeGreaterThanEqual(int age);\n}\n\n// Usage\nrepo.findAll();\nrepo.findById(1L);\nrepo.save(new Student());\nrepo.deleteById(1L);"
+      },
+      "resources": [
+        { "label": "Django — ORM queries", "url": "https://docs.djangoproject.com/en/stable/topics/db/queries/" },
+        { "label": "Spring Data JPA", "url": "https://docs.spring.io/spring-data/jpa/reference/" }
+      ]
+    },
+    {
+      "id": "migrations",
+      "title": "Migrations — Database Changes",
+      "learn": "Version-controlled schema changes.",
+      "python": {
+        "definition": "makemigrations detects model changes and writes migration files; migrate applies them to the DB.",
+        "code": "python manage.py makemigrations   # detect changes\npython manage.py migrate          # apply to DB\npython manage.py sqlmigrate polls 0001  # view SQL"
+      },
+      "java": {
+        "definition": "Flyway or Liquibase manage schema versions via SQL migration files; Hibernate ddl-auto can also update schema.",
+        "code": "# application.properties\nspring.jpa.hibernate.ddl-auto=update\n\n# Or Flyway:\n# src/main/resources/db/migration/V1__init.sql\n# CREATE TABLE students (...);\n# then: flyway migrate (auto on startup)"
+      },
+      "resources": [
+        { "label": "Django — Migrations", "url": "https://docs.djangoproject.com/en/stable/topics/migrations/" },
+        { "label": "Flyway", "url": "https://documentation.red-gate.com/fd" }
+      ]
+    },
+    {
+      "id": "admin",
+      "title": "Admin / Management UI",
+      "learn": "Built-in back-office for managing data.",
+      "python": {
+        "definition": "Django Admin is an auto-generated CRUD UI — register models in admin.py, get a full admin panel at /admin.",
+        "code": "from django.contrib import admin\nfrom .models import Student\n\nadmin.site.register(Student)\n# -> http://127.0.0.1:8000/admin"
+      },
+      "java": {
+        "definition": "No built-in admin — use Spring Boot Admin (monitoring) or build custom pages with Thymeleaf/React.",
+        "code": "// Spring Boot Admin dependency (for app monitoring)\n// <dependency>\n//   <artifactId>spring-boot-admin-starter-client</artifactId>\n// </dependency>\n// For data admin: build CRUD with @Controller + Thymeleaf templates"
+      },
+      "resources": []
+    },
+    {
+      "id": "forms-validation",
+      "title": "Forms & Validation",
+      "learn": "Input validation.",
+      "python": {
+        "definition": "ModelForm auto-validates from model fields; is_valid()/cleaned_data handle checks. errors dict shows failures.",
+        "code": "from django import forms\n\nclass StudentForm(forms.ModelForm):\n    class Meta:\n        model = Student\n        fields = [\"name\", \"age\", \"email\"]\n        widgets = {\"age\": forms.NumberInput(attrs={\"min\": 0})}\n\nform = StudentForm(request.POST)\nif form.is_valid():\n    student = form.save()"
+      },
+      "java": {
+        "definition": "Bean Validation annotations (@NotNull, @Min, @Email) on fields + @Valid on controller params; errors via BindingResult.",
+        "code": "public class StudentDto {\n    @NotBlank private String name;\n    @Min(0) private int age;\n    @Email private String email;\n}\n\n@PostMapping\npublic Student create(@Valid @RequestBody StudentDto dto,\n                       BindingResult result) {\n    if (result.hasErrors()) throw new ResponseStatusException(BAD_REQUEST);\n    return service.save(dto);\n}"
+      },
+      "resources": [
+        { "label": "Django — Forms", "url": "https://docs.djangoproject.com/en/stable/topics/forms/" },
+        { "label": "Bean Validation", "url": "https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html" }
+      ]
+    },
+    {
+      "id": "auth",
+      "title": "Authentication — Login & Registration",
+      "learn": "User login and registration.",
+      "python": {
+        "definition": "django.contrib.auth provides User model, login()/logout() views, @login_required decorator.",
+        "code": "from django.contrib.auth.forms import UserCreationForm\nfrom django.contrib.auth.views import LoginView\n\n# urls.py\npath(\"register/\", views.register),  # uses UserCreationForm\npath(\"login/\", LoginView.as_view()),\n\n# views.py\n@login_required\ndef dashboard(request):\n    return render(request, \"dashboard.html\")"
+      },
+      "java": {
+        "definition": "Spring Security handles auth — configure SecurityFilterChain, use UserDetailsService, password encoder (BCrypt).",
+        "code": "@Configuration\n@EnableWebSecurity\npublic class SecurityConfig {\n    @Bean\n    SecurityFilterChain chain(HttpSecurity http) throws Exception {\n        return http\n            .authorizeHttpRequests(a -> a\n                .requestMatchers(\"/api/public/**\").permitAll()\n                .anyRequest().authenticated())\n            .formLogin(Customizer.withDefaults())\n            .build();\n    }\n}"
+      },
+      "resources": [
+        { "label": "Django — Authentication", "url": "https://docs.djangoproject.com/en/stable/topics/auth/" },
+        { "label": "Spring Security", "url": "https://docs.spring.io/spring-security/reference/" }
+      ]
+    },
+    {
+      "id": "middleware-permissions",
+      "title": "Middleware & Permissions",
+      "learn": "Request processing pipeline and access control.",
+      "python": {
+        "definition": "Middleware processes every request/response (auth, sessions, CSRF). @login_required / permission_required decorators gate views.",
+        "code": "# settings.py MIDDLEWARE list processes requests top-down\n\nfrom django.contrib.auth.decorators import login_required, permission_required\n\n@login_required\ndef my_view(request): ...\n\n@permission_required(\"polls.change_vote\")\ndef admin_view(request): ..."
+      },
+      "java": {
+        "definition": "Servlet Filters and Spring interceptors (HandlerInterceptor) sit in the request pipeline; @PreAuthorize does method-level security.",
+        "code": "@Component\npublic class LoggingFilter extends OncePerRequestFilter {\n    protected void doFilterInternal(HttpServletRequest req,\n        HttpServletResponse res, FilterChain chain) throws Exception {\n        System.out.println(req.getRequestURI());\n        chain.doFilter(req, res);\n    }\n}\n\n@PreAuthorize(\"hasRole('ADMIN')\")\n@DeleteMapping(\"/{id}\")\npublic void delete(@PathVariable Long id) { ... }"
+      },
+      "resources": [
+        { "label": "Django — Middleware", "url": "https://docs.djangoproject.com/en/stable/topics/http/middleware/" },
+        { "label": "Spring — Filters", "url": "https://docs.spring.io/spring-framework/reference/web/servlet/filters.html" }
+      ]
+    },
+    {
+      "id": "rest-api-intro",
+      "title": "REST API — Introduction",
+      "learn": "What REST is — resources, HTTP verbs, statelessness.",
+      "python": {
+        "definition": "REST maps resources to URLs and operations to HTTP verbs (GET/POST/PUT/DELETE). Django REST Framework (DRF) builds APIs on this.",
+        "code": "pip install djangorestframework\n\n# REST endpoints\nGET    /api/students/     -> list\nPOST   /api/students/     -> create\nGET    /api/students/1/   -> retrieve\nPUT    /api/students/1/   -> update\nDELETE /api/students/1/   -> delete"
+      },
+      "java": {
+        "definition": "Spring MVC @RestController exposes REST endpoints; Spring Data REST can auto-generate them from repositories.",
+        "code": "@RestController\n@RequestMapping(\"/api/students\")\npublic class StudentApi {\n    @GetMapping          // GET /api/students\n    @PostMapping         // POST /api/students\n    @GetMapping(\"/{id}\")\n    @PutMapping(\"/{id}\")\n    @DeleteMapping(\"/{id}\")\n}"
+      },
+      "resources": [
+        { "label": "DRF docs", "url": "https://www.django-rest-framework.org/" },
+        { "label": "Spring REST", "url": "https://spring.io/guides/tutorials/rest/" }
+      ]
+    },
+    {
+      "id": "serializers",
+      "title": "Serializers / DTOs",
+      "learn": "Converting between Python/Java objects and JSON.",
+      "python": {
+        "definition": "DRF serializers convert model instances <-> JSON, and validate incoming data.",
+        "code": "from rest_framework import serializers\n\nclass StudentSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = Student\n        fields = [\"id\", \"name\", \"age\", \"email\"]\n\n# serialize\njson_data = StudentSerializer(student).data\n# deserialize + validate\ns = StudentSerializer(data=request.data)\nif s.is_valid(): s.save()"
+      },
+      "java": {
+        "definition": "DTOs (Data Transfer Objects) with Jackson annotations (@JsonProperty) shape the JSON; records work well in modern Java.",
+        "code": "public record StudentDto(Long id, String name, int age, String email) {}\n\n// Controller accepts/returns DTOs — Jackson auto-converts\n@PostMapping\npublic StudentDto create(@RequestBody StudentDto dto) {\n    return service.create(dto);\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "fbv-cbv",
+      "title": "Function-Based vs Class-Based Views",
+      "learn": "Two styles of writing views/controllers.",
+      "python": {
+        "definition": "FBV: plain functions taking request -> response. CBV: classes inheriting View/ListView/DetailView with get()/post() methods.",
+        "code": "# FBV\ndef student_list(request):\n    students = Student.objects.all()\n    return JsonResponse({\"data\": list(students.values())})\n\n# CBV\nfrom django.views.generic import ListView\nclass StudentListView(ListView):\n    model = Student\n    template_name = \"students.html\""
+      },
+      "java": {
+        "definition": "Spring is class-based by nature — @RestController classes with annotated handler methods. No function-style endpoints.",
+        "code": "@RestController\n@RequestMapping(\"/students\")\npublic class StudentController {\n    @GetMapping\n    public List<StudentDto> list() { ... }\n\n    @PostMapping\n    public StudentDto create(@RequestBody StudentDto dto) { ... }\n}"
+      },
+      "resources": [
+        { "label": "Django — Class-based views", "url": "https://docs.djangoproject.com/en/stable/topics/class-based-views/" }
+      ]
+    },
+    {
+      "id": "generic-views",
+      "title": "Generic Views",
+      "learn": "Pre-built views for common patterns (list, detail, create, update, delete).",
+      "python": {
+        "definition": "django.views.generic provides ListView, DetailView, CreateView, UpdateView, DeleteView — only model + template needed.",
+        "code": "from django.views.generic import ListView, DetailView, CreateView\n\nclass StudentList(ListView):\n    model = Student\n    template_name = \"students.html\"\n\nclass StudentDetail(DetailView):\n    model = Student\n\nclass StudentCreate(CreateView):\n    model = Student\n    fields = [\"name\", \"age\", \"email\"]\n    success_url = \"/students/\""
+      },
+      "java": {
+        "definition": "No direct generic-view equivalent — Spring Data REST auto-exposes full CRUD from a repository interface.",
+        "code": "@RepositoryRestResource(collectionResourceRel = \"students\",\n                        path = \"students\")\npublic interface StudentRepository\n        extends JpaRepository<Student, Long> {}\n// Automatically exposes GET/POST/PUT/DELETE /students"
+      },
+      "resources": [
+        { "label": "Django — Generic views", "url": "https://docs.djangoproject.com/en/stable/ref/class-based-views/" },
+        { "label": "Spring Data REST", "url": "https://spring.io/projects/spring-data-rest" }
+      ]
+    },
+    {
+      "id": "viewsets-routers",
+      "title": "ViewSets & Routers",
+      "learn": "Automatic CRUD endpoints for a whole model.",
+      "python": {
+        "definition": "DRF ModelViewSet + DefaultRouter auto-generate all CRUD routes from a queryset — minimal code for a full API.",
+        "code": "from rest_framework import viewsets\nfrom rest_framework.routers import DefaultRouter\n\nclass StudentViewSet(viewsets.ModelViewSet):\n    queryset = Student.objects.all()\n    serializer_class = StudentSerializer\n\nrouter = DefaultRouter()\nrouter.register(r\"students\", StudentViewSet)\n# -> /api/students/ GET POST, /api/students/1/ GET PUT DELETE"
+      },
+      "java": {
+        "definition": "Spring equivalent = Spring Data REST repository above, or a base controller class with common CRUD methods.",
+        "code": "// CrudRepository already gives findAll/save/delete —\n// expose via @RestController or Spring Data REST:\n\n@RestController\n@RequestMapping(\"/api/students\")\npublic class StudentApi {\n    private final StudentRepository repo;\n    // inject repo, expose CRUD methods\n}"
+      },
+      "resources": [
+        { "label": "DRF — ViewSets", "url": "https://www.django-rest-framework.org/api-guide/viewsets/" }
+      ]
+    },
+    {
+      "id": "crud-apis",
+      "title": "CRUD APIs",
+      "learn": "Full Create-Read-Update-Delete API implementation.",
+      "python": {
+        "definition": "DRF APIView or generic views implement each HTTP method explicitly for full control.",
+        "code": "from rest_framework.views import APIView\nfrom rest_framework.response import Response\n\nclass StudentAPI(APIView):\n    def get(self, request):\n        return Response(Student.objects.all().values())\n    def post(self, request):\n        s = StudentSerializer(data=request.data)\n        s.is_valid(raise_exception=True)\n        s.save(); return Response(s.data, status=201)"
+      },
+      "java": {
+        "definition": "Standard @RestController with five methods — one per HTTP verb.",
+        "code": "@RestController\n@RequestMapping(\"/api/students\")\npublic class StudentApi {\n    @GetMapping public List<StudentDto> all() { ... }\n    @GetMapping(\"/{id}\") public StudentDto one(@PathVariable Long id) { ... }\n    @PostMapping public StudentDto create(@Valid @RequestBody StudentDto d) { ... }\n    @PutMapping(\"/{id}\") public StudentDto update(@PathVariable Long id, @RequestBody StudentDto d) { ... }\n    @DeleteMapping(\"/{id}\") public void delete(@PathVariable Long id) { ... }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "jwt-auth",
+      "title": "JWT Authentication",
+      "learn": "Token-based stateless authentication.",
+      "python": {
+        "definition": "djangorestframework-simplejwt issues JWT access/refresh tokens; client sends 'Authorization: Bearer <token>'.",
+        "code": "pip install djangorestframework-simplejwt\n\nREST_FRAMEWORK = {\n  \"DEFAULT_AUTHENTICATION_CLASSES\": (\n    \"rest_framework_simplejwt.authentication.JWTAuthentication\",),\n}\n\n# POST /api/token/ {username, password} -> {access, refresh}\n# GET  /api/students/  Header: Authorization: Bearer <access>"
+      },
+      "java": {
+        "definition": "jjwt or spring-security-oauth2-resource-server validates JWTs; configure a JwtDecoder and SecurityFilterChain.",
+        "code": "http.authorizeHttpRequests(a -> a\n    .requestMatchers(\"/api/auth/**\").permitAll()\n    .anyRequest().authenticated())\n.oauth2ResourceServer(o -> o.jwt(Customizer.withDefaults()));\n\n// POST /api/auth/login returns {accessToken, refreshToken}\n// Client sends: Authorization: Bearer <accessToken>"
+      },
+      "resources": [
+        { "label": "SimpleJWT", "url": "https://django-rest-framework-simplejwt.readthedocs.io/" },
+        { "label": "Spring JWT", "url": "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html" }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "Permissions & Authorization",
+      "learn": "Who can do what — role/permission checks.",
+      "python": {
+        "definition": "DRF permission_classes: IsAuthenticated, IsAdminUser, or custom has_permission(). Django groups/permissions also work.",
+        "code": "from rest_framework.permissions import IsAuthenticated, IsAdminUser\n\nclass StudentViewSet(viewsets.ModelViewSet):\n    permission_classes = [IsAuthenticated]\n\n    def get_permissions(self):\n        if self.action == \"destroy\":\n            return [IsAdminUser()]\n        return super().get_permissions()"
+      },
+      "java": {
+        "definition": "@PreAuthorize / hasRole() / hasAuthority() annotations + method security (@EnableMethodSecurity).",
+        "code": "@PreAuthorize(\"hasRole('ADMIN')\")\n@DeleteMapping(\"/{id}\")\npublic void delete(@PathVariable Long id) { repo.deleteById(id); }\n\n@PreAuthorize(\"@studentService.isOwner(#id, authentication)\")\n@GetMapping(\"/mine/{id}\")\npublic StudentDto mine(@PathVariable Long id) { ... }"
+      },
+      "resources": [
+        { "label": "DRF — Permissions", "url": "https://www.django-rest-framework.org/api-guide/permissions/" },
+        { "label": "Spring — Method Security", "url": "https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html" }
+      ]
+    },
+    {
+      "id": "pagination-filtering",
+      "title": "Pagination, Filtering & Search",
+      "learn": "Handling large result sets.",
+      "python": {
+        "definition": "DRF PageNumberPagination splits results into pages; django-filter adds query-param filtering (e.g. ?age=20&search=name).",
+        "code": "REST_FRAMEWORK = {\n  \"DEFAULT_PAGINATION_CLASS\":\n    \"rest_framework.pagination.PageNumberPagination\",\n  \"PAGE_SIZE\": 10,\n}\n# GET /api/students/?page=2&age=20&search=priya"
+      },
+      "java": {
+        "definition": "Spring Pageable parameter auto-paginates; JpaSpecificationExecutor or QueryDSL builds dynamic filters.",
+        "code": "@GetMapping\npublic Page<StudentDto> list(Pageable pageable,\n        @RequestParam(required=false) String search) {\n    return service.search(search, pageable);\n}\n// GET /api/students?page=1&size=10&sort=name,asc&search=priya"
+      },
+      "resources": [
+        { "label": "DRF — Pagination", "url": "https://www.django-rest-framework.org/api-guide/pagination/" },
+        { "label": "Spring — Pageable", "url": "https://docs.spring.io/spring-data/jpa/reference/repositories/query-methods.html" }
+      ]
+    },
+    {
+      "id": "api-validation",
+      "title": "API Validation",
+      "learn": "Validating request data before processing.",
+      "python": {
+        "definition": "Serializer validation: field types, validators=, custom validate_<field>() methods — invalid data returns 400 with error details.",
+        "code": "class StudentSerializer(serializers.Serializer):\n    name = serializers.CharField(max_length=100)\n    age = serializers.IntegerField(min_value=0, max_value=120)\n    email = serializers.EmailField()\n\n    def validate_age(self, value):\n        if value < 5: raise serializers.ValidationError(\"Too young\")\n        return value"
+      },
+      "java": {
+        "definition": "@Valid + Bean Validation annotations on DTO fields; @ExceptionHandler formats errors consistently.",
+        "code": "public record StudentDto(\n    @NotBlank @Size(max=100) String name,\n    @Min(0) @Max(120) int age,\n    @Email String email) {}\n\n@RestControllerAdvice\npublic class ApiExceptionHandler {\n    @ExceptionHandler(MethodArgumentNotValidException.class)\n    public ResponseEntity<Map<String,String>> handle(\n            MethodArgumentNotValidException ex) { ... }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "postman-testing",
+      "title": "API Testing with Postman",
+      "learn": "Testing APIs manually and with collections.",
+      "python": {
+        "definition": "Postman is language-agnostic — test DRF endpoints with GET/POST/PUT/DELETE requests, JSON bodies, and auth headers.",
+        "code": "# Example requests against a Django API\nGET    http://127.0.0.1:8000/api/students/\nPOST   http://127.0.0.1:8000/api/students/\n       Body (JSON): {\"name\": \"Priya\", \"age\": 20, \"email\": \"p@x.com\"}\nPUT    http://127.0.0.1:8000/api/students/1/\nDELETE http://127.0.0.1:8000/api/students/1/\n# Auth header: Authorization: Bearer <jwt-token>"
+      },
+      "java": {
+        "definition": "Same Postman workflow against Spring Boot endpoints (default port 8080). Use Tests tab + environments for variables.",
+        "code": "GET    http://localhost:8080/api/students\nPOST   http://localhost:8080/api/students\n       Body (JSON): {\"name\": \"Priya\", \"age\": 20, \"email\": \"p@x.com\"}\nPUT    http://localhost:8080/api/students/1\nDELETE http://localhost:8080/api/students/1\n# Auth header: Authorization: Bearer <jwt-token>"
+      },
+      "resources": [
+        { "label": "Postman Learning Center", "url": "https://learning.postman.com/" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+{
+  "section": {
+    "id": "java-core-b",
+    "title": "Java Core — OOP, Collections & Concurrency",
+    "subtitle": "Collection implementations deep-dive, iterators, comparable vs comparator, enum, singleton, bean lifecycle, threads, synchronization, streams, Optional and more."
+  },
+  "leftLabel": "Python",
+  "rightLabel": "Java",
+  "leftColor": "#3776ab",
+  "rightColor": "#b07219",
+  "topics": [
+    {
+      "id": "collections-list",
+      "title": "Collections — Lists (ArrayList, LinkedList, Vector, Stack, ArrayDeque)",
+      "learn": "When to use which list — capacity, thread-safety, performance.",
+      "python": {
+        "definition": "Python has ONE list type covering all cases — dynamic array, not thread-safe. deque from collections for queue/stack behaviour. No capacity control.",
+        "code": "from collections import deque\n\nlst = [1, 2, 3]          # dynamic, auto-grows\nlst.append(4)           # amortised O(1)\nlst.insert(0, 0)        # O(n) — shifts all\nlst.pop()              # O(1) from end\nlst.pop(0)             # O(n) from front!\n\nd = deque([1,2,3])      # fast both ends\nd.appendleft(0)         # O(1)\nd.popleft()             # O(1)"
+      },
+      "java": {
+        "definition": "ArrayList: dynamic array, ~50% growth (10->15->22...), NOT thread-safe — default choice. LinkedList: nodes, O(1) insert at ends, more memory, rarely used. Vector: legacy, synchronized (thread-safe), 100% growth. Stack: Vector subclass, LIFO. ArrayDeque: resizable array, faster than Stack/LinkedList for stacks/queues. Capacity: ArrayList initial 10.",
+        "code": "List<Integer> al = new ArrayList<>(10); // cap 10 -> grows ~50%\nLinkedList<Integer> ll = new LinkedList<>();\nVector<Integer> v = new Vector<>(10); // cap 10, grows 100%\nStack<Integer> st = new Stack();      // legacy LIFO\nDeque<Integer> dq = new ArrayDeque<>(); // modern stack/queue\n\n// Thread-safe? ArrayList NO, LinkedList NO,\n// Vector YES (all methods synchronized), ArrayDeque NO\n\ndq.push(1); dq.pop(); dq.peek(); // stack ops\n// add/offer = insert, remove/poll = remove, peek = view top"
+      },
+      "resources": [
+        { "label": "Java — List implementations", "url": "https://docs.oracle.com/javase/tutorial/collections/implementations/list.html" }
+      ]
+    },
+    {
+      "id": "collections-set",
+      "title": "Collections — Sets (HashSet, LinkedHashSet, TreeSet)",
+      "learn": "Unique-element collections — capacity, ordering, null rules.",
+      "python": {
+        "definition": "set = unordered unique items (hash table). dict.fromkeys or set() — no capacity control, allows None. frozenset = immutable version.",
+        "code": "s = {1, 2, 3, 3}        # {1, 2, 3} — dup removed\ns.add(4); s.remove(1)\nprint(None in s)          # can hold None\n\n# Ordered variant: dict keys preserve insertion order\nordered = dict.fromkeys([3, 1, 2])   # {3:None, 1:None, 2:None}\n\n# Sorted: use sorted() (returns list)\nprint(sorted(s, reverse=True))"
+      },
+      "java": {
+        "definition": "HashSet: hash table, cap 16, grows ~double, NOT thread-safe, allows ONE null, unordered. LinkedHashSet: HashSet + insertion-order linked list, allows null. TreeSet: Red-Black tree, NO capacity, sorted order, NO null allowed, extra methods: first(), last(), headSet(), tailSet(), descendingSet(), subSet().",
+        "code": "Set<Integer> hs = new HashSet<>();      // cap 16\nSet<Integer> lhs = new LinkedHashSet<>(); // insertion order\nSet<Integer> ts = new TreeSet<>();      // sorted\n\nhs.add(null);          // OK — one null\nts.add(null);          // NullPointerException!\n\nTreeSet<Integer> t = new TreeSet<>(Set.of(5,1,9,3));\nt.first();             // 1\nt.last();              // 9\nt.headSet(5);          // {1, 3}\nt.tailSet(5);          // {5, 9}\nt.subSet(1, 9);        // {1, 3, 5}\nt.descendingSet();     // {9, 5, 3, 1}\n// Set ops: addAll(union) removeAll(difference) retainAll(intersection)"
+      },
+      "resources": [
+        { "label": "Java — Set implementations", "url": "https://docs.oracle.com/javase/tutorial/collections/implementations/set.html" }
+      ]
+    },
+    {
+      "id": "collections-map",
+      "title": "Collections — Maps (HashMap, LinkedHashMap, TreeMap, Hashtable)",
+      "learn": "Key-value stores — capacity, thread-safety, ordering, null rules.",
+      "python": {
+        "definition": "dict = hash table, insertion-ordered (3.7+), keys must be hashable, allows one None key. No thread-safe variant built-in (use threading.Lock).",
+        "code": "d = {\"a\": 1, \"b\": 2}\nd[\"c\"] = 3\ndel d[\"a\"]\nprint(d.get(\"x\", 0))    # default value\nprint(d.keys(), d.values(), d.items())\n\n# Ordered: dict IS insertion-ordered\n# Sorted: dict(sorted(d.items()))\n# Thread-safe: wrap with a Lock"
+      },
+      "java": {
+        "definition": "HashMap: cap 16, ~75% load factor triggers resize, NOT thread-safe, allows ONE null key + many null values. LinkedHashMap: HashMap + insertion/access order. TreeMap: Red-Black tree, keys sorted, NO null keys. Hashtable: LEGACY — synchronized (thread-safe), NO null key/value, cap 11. ConcurrentHashMap = modern thread-safe choice.",
+        "code": "Map<String,Integer> hm = new HashMap<>();      // cap 16\nMap<String,Integer> lhm = new LinkedHashMap<>(); // insertion order\nMap<String,Integer> tm = new TreeMap<>();      // sorted keys\nMap<String,Integer> ht = new Hashtable<>();    // legacy, sync\nMap<String,Integer> chm = new ConcurrentHashMap<>(); // thread-safe!\n\nhm.put(\"a\", 1); hm.put(null, 0);   // null key OK\nht.put(null, 1);                     // NullPointerException!\ntm.put(null, 1);                     // NullPointerException!\n\n// ConcurrentHashMap for multi-threaded access"
+      },
+      "resources": [
+        { "label": "Java — Map implementations", "url": "https://docs.oracle.com/javase/tutorial/collections/implementations/map.html" }
+      ]
+    },
+    {
+      "id": "iterators",
+      "title": "Iterators — Iterator, ListIterator, Enumeration & Legacy",
+      "learn": "Traversing collections; old legacy classes and their replacements.",
+      "python": {
+        "definition": "iter() creates iterator; next() advances; for-loop uses it internally. iterators support remove() (since 3.x). list_iterator? — iter() only goes forward; reversed() goes backward.",
+        "code": "lst = [10, 20, 30]\nit = iter(lst)          # create iterator\nprint(next(it))         # 10\nprint(next(it))         # 20\n\n# for-loop = sugar for iterator\nfor x in lst: print(x)\n\n# Remove during iteration\nfor x in lst[:]:        # iterate over COPY\n    if x == 20: lst.remove(x)\n# or use list comprehension to filter"
+      },
+      "java": {
+        "definition": "Iterator<T>: hasNext()/next()/remove() — FORWARD only, all collections. ListIterator<T>: adds hasPrevious()/previous()/add()/set() — LISTS only, bidirectional. Enumeration<T>: LEGACY forward-only, can't remove — replaced by Iterator. Legacy->modern: Vector->ArrayList, Stack->ArrayDeque, Hashtable->HashMap, Enumeration->Iterator.",
+        "code": "List<Integer> al = new ArrayList<>(List.of(10,20,30));\n\n// Iterator — forward only, all collections\nIterator<Integer> it = al.iterator();\nwhile (it.hasNext()) {\n    int x = it.next();\n    if (x == 20) it.remove();   // safe remove!\n}\n\n// ListIterator — lists only, both directions\nListIterator<Integer> li = al.listIterator();\nwhile (li.hasNext()) { ... }\nli.previous();  // go backward\nli.add(x); li.set(x);\n\n// Enumeration — legacy, forward only, NO remove\nVector<Integer> v = new Vector<>();\nEnumeration<Integer> e = v.elements();\nwhile (e.hasMoreElements()) {\n    int x = e.nextElement();\n}\n// e.remove() DOESN'T EXIST"
+      },
+      "resources": [
+        { "label": "Java — Iterators", "url": "https://docs.oracle.com/javase/tutorial/collections/interfaces/list.html" }
+      ]
+    },
+    {
+      "id": "comparable-comparator",
+      "title": "Comparable vs Comparator",
+      "learn": "Two ways to define sort order — natural vs custom.",
+      "python": {
+        "definition": "sorted() takes key= function — equivalent of Comparator. __lt__ in a class = Comparable (natural ordering). No interface needed.",
+        "code": "students = [(\"Priya\", 90), (\"Sam\", 85), (\"Amy\", 95)]\n\n# key= = Comparator equivalent\nby_name = sorted(students, key=lambda s: s[0])\nby_marks = sorted(students, key=lambda s: s[1], reverse=True)\n\n# __lt__ = Comparable equivalent\nclass Student:\n    def __init__(self, marks): self.marks = marks\n    def __lt__(self, other): return self.marks < other.marks\n\nsorted([Student(90), Student(85)])"
+      },
+      "java": {
+        "definition": "Comparable<T>: class implements compareTo() — ONE natural ordering, can't change at runtime. Comparator<T>: separate class/lambda — MULTIPLE custom orderings, use for different sorts. sort() uses Comparable; sort(comparator) uses Comparator.",
+        "code": "// Comparable — natural ordering (one way)\nclass Student implements Comparable<Student> {\n    int marks;\n    public int compareTo(Student o) {\n        return Integer.compare(this.marks, o.marks);\n    }\n}\n\n// Comparator — custom orderings (many ways)\nComparator<Student> byName =\n    Comparator.comparing(s -> s.name);\nComparator<Student> byMarksDesc =\n    Comparator.comparingInt(s -> s.marks).reversed();\n\nlist.sort(null);              // uses Comparable\nlist.sort(byName);           // uses Comparator\nlist.sort(byMarksDesc);      // different order!"
+      },
+      "resources": [
+        { "label": "Java — Comparable & Comparator", "url": "https://docs.oracle.com/javase/tutorial/collections/interfaces/order.html" }
+      ]
+    },
+    {
+      "id": "enum",
+      "title": "Enum — Constants with Behaviour",
+      "learn": "Enumerations: constructors, methods, values(), ordinal(), valueOf(), abstract methods.",
+      "python": {
+        "definition": "Python 3.11+ has enum.Enum/IntEnum — named constants with optional methods. No ordinal/valueOf builtins — use list(Enum) and Enum['NAME'].",
+        "code": "from enum import Enum\n\nclass Color(Enum):\n    RED = 1\n    GREEN = 2\n    BLUE = 3\n\n    def describe(self):          # methods allowed\n        return f\"color-{self.name}\"\n\nprint(Color.RED.describe())\nprint(list(Color))              # all values\nprint(Color['RED'])             # by name\nprint(Color.RED.value)          # 1\nprint(Color.RED.name)           # 'RED'"
+      },
+      "java": {
+        "definition": "enum = fixed set of constants. Can have constructor (private), fields, methods, abstract methods (each constant implements). Built-ins: values() -> all constants array, ordinal() -> index, valueOf(\"NAME\") -> constant by name.",
+        "code": "public enum Day {\n    MONDAY(\"Mon\"), TUESDAY(\"Tue\"), WEDNESDAY(\"Wed\");\n    private final String shortName;\n    Day(String s) { shortName = s; }  // constructor (private)\n    public String getShort() { return shortName; }\n}\n\n// Abstract method in enum — each constant implements\nenum Op {\n    ADD { int apply(int a,int b){return a+b;} },\n    SUB { int apply(int a,int b){return a-b;} };\n    abstract int apply(int a, int b);\n}\n\nDay.values()          // [MONDAY, TUESDAY, WEDNESDAY]\nDay.MONDAY.ordinal()  // 0\nDay.valueOf(\"MONDAY\") // MONDAY\nDay.MONDAY.getShort() // Mon"
+      },
+      "resources": [
+        { "label": "Java — Enums", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html" },
+        { "label": "Python — enum", "url": "https://docs.python.org/3/library/enum.html" }
+      ]
+    },
+    {
+      "id": "singleton",
+      "title": "Singleton Pattern",
+      "learn": "Ensuring only ONE instance of a class — eager, lazy, thread-safe.",
+      "python": {
+        "definition": "Module itself acts as singleton (import once). __new__ can enforce single instance; or use a metaclass / module-level instance.",
+        "code": "# Module = natural singleton\n# config.py loaded once by import system\n\nclass Singleton:\n    _instance = None\n    def __new__(cls):\n        if cls._instance is None:\n            cls._instance = super().__new__(cls)\n        return cls._instance\n\na = Singleton(); b = Singleton()\nprint(a is b)   # True — same object"
+      },
+      "java": {
+        "definition": "Eager: instance created at class load (static field). Lazy: created on first getInstance(). Thread-safe: synchronized method or Bill Pugh (static inner class — best practice, lazy + thread-safe without sync).",
+        "code": "// Bill Pugh — lazy + thread-safe (recommended)\npublic class Singleton {\n    private Singleton() {}\n    private static class Holder {\n        private static final Singleton INSTANCE = new Singleton();\n    }\n    public static Singleton getInstance() {\n        return Holder.INSTANCE;   // created on first call\n    }\n}\n\n// Eager: private static final Singleton I = new Singleton();\n// Lazy sync: public static synchronized Singleton getInstance()"
+      },
+      "resources": []
+    },
+    {
+      "id": "bean-lifecycle",
+      "title": "Bean Lifecycle",
+      "learn": "Spring bean creation phases: instantiate, populate, initialize, destroy.",
+      "python": {
+        "definition": "Python has no bean container — but Django app loading follows similar phases: import models -> populate -> ready(). __init__ ~ instantiate, __init_subclass__ ~ initialize.",
+        "code": "# Django AppConfig.ready() runs once at startup\nclass MyAppConfig(AppConfig):\n    def ready(self):\n        # 'initialize' phase — connect signals, setup\n        pass\n\n# Object lifecycle in plain Python:\nobj = MyClass()      # __new__ (instantiate) + __init__ (populate/init)\ndel obj              # __del__ (~destroy)\n# No standard 'destroy' hook — use context managers:\nwith resource() as r: ...   # __exit__ = cleanup"
+      },
+      "java": {
+        "definition": "Spring bean lifecycle: 1) Instantiate (new), 2) Populate properties (@Autowired/DI), 3) Initialize (@PostConstruct / InitializingBean / init-method), 4) Ready for use, 5) Destroy (@PreDestroy / DisposableBean / destroy-method).",
+        "code": "@Component\npublic class MyBean {\n    @Autowired private Repo repo;   // populate\n\n    @PostConstruct              // initialize\n    public void init() {\n        System.out.println(\"Bean initialized\");\n    }\n\n    @PreDestroy                 // destroy\n    public void cleanup() {\n        System.out.println(\"Bean destroying\");\n    }\n}\n// Order: new -> autowire -> @PostConstruct -> use -> @PreDestroy"
+      },
+      "resources": [
+        { "label": "Spring — Bean Lifecycle", "url": "https://docs.spring.io/spring-framework/reference/core/beans/factory-lifecycle.html" }
+      ]
+    },
+    {
+      "id": "thread-lifecycle",
+      "title": "Thread Life Cycle",
+      "learn": "States: NEW -> RUNNABLE -> RUNNING -> WAITING/BLOCKED/TIMED_WAITING -> TERMINATED.",
+      "python": {
+        "definition": "Python threads (threading.Thread) have similar states but GIL limits true parallelism for CPU work. start() begins, run() contains logic, join() waits.",
+        "code": "import threading, time\n\ndef worker():\n    print(\"running\")\n    time.sleep(1)\n    print(\"done\")\n\nt = threading.Thread(target=worker)  # NEW\nt.start()                            # -> RUNNING\nt.join()                             # main waits -> TERMINATED\n\n# States via t.is_alive()\n# No explicit BLOCKED/WAITING states visible"
+      },
+      "java": {
+        "definition": "NEW (created, not started) -> RUNNABLE (start() called, waiting for CPU) -> RUNNING (executing on thread) -> WAITING (wait()), TIMED_WAITING (sleep()), BLOCKED (waiting for lock) -> TERMINATED (run() ends or stop()).",
+        "code": "Thread t = new Thread(() -> {\n    System.out.println(\"running\");\n    try { Thread.sleep(1000); }  // TIMED_WAITING\n    catch (InterruptedException e) {}\n});\n// t.getState() -> NEW\nt.start();      // -> RUNNABLE -> RUNNING\n// states: NEW, RUNNABLE, RUNNING, WAITING,\n// TIMED_WAITING, BLOCKED, TERMINATED\nt.join();       // wait for TERMINATED"
+      },
+      "resources": [
+        { "label": "Java — Thread states", "url": "https://docs.oracle.com/javase/tutorial/essential/concurrency/threadsync.html" }
+      ]
+    },
+    {
+      "id": "thread-communication",
+      "title": "Thread Communication — wait/notify/sleep/join, Race Condition, synchronized",
+      "learn": "Inter-thread communication and preventing race conditions.",
+      "python": {
+        "definition": "threading: wait()/notify()/notify_all() via Condition; sleep() pauses; join() waits for thread. Lock/RLock prevent race conditions; GIL helps but doesn't eliminate races.",
+        "code": "import threading, time\n\nlock = threading.Lock()\ncounter = 0\n\ndef increment():\n    global counter\n    with lock:            # synchronized block equivalent\n        counter += 1\n\n# Race condition: counter += 1 without lock\n# can lose updates when threads interleave\n\nt1 = threading.Thread(target=increment)\nt2 = threading.Thread(target=increment)\nt1.start(); t2.start()\nt1.join(); t2.join()\n# time.sleep(0.1) = pause thread\n# Condition().wait()/notify() = wait/notify"
+      },
+      "java": {
+        "definition": "wait() releases lock & waits for notify()/notifyAll(). sleep(ms) pauses (doesn't release lock). join() waits for thread death. Race condition = shared data corrupted by concurrent access — fixed by synchronized (method or block) or locks.",
+        "code": "class Counter {\n    int count = 0;\n    public synchronized void inc() { count++; } // method-level sync\n    // OR block-level:\n    // synchronized(this) { count++; }\n}\n\nThread t1 = new Thread(() -> {\n    for (int i=0;i<1000;i++) c.inc();\n});\nThread.sleep(500);      // pause current thread\nt1.join();              // wait for t1 to die\n// wait()/notify() need synchronized block:\n// synchronized(obj) { obj.wait(); obj.notifyAll(); }"
+      },
+      "resources": [
+        { "label": "Java — Synchronization", "url": "https://docs.oracle.com/javase/tutorial/essential/concurrency/syncmeth.html" }
+      ]
+    },
+    {
+      "id": "streams-deep",
+      "title": "Java Streams — Source, Intermediate & Terminal Operations",
+      "learn": "Stream pipeline: source -> intermediate ops -> single terminal op.",
+      "python": {
+        "definition": "No streams — generators + itertools.chain/map/filter give lazy pipelines. List comprehensions are eager equivalent.",
+        "code": "nums = [1, 2, 3, 4, 5, 6]\n\n# Pipeline = comprehension (eager)\nresult = [x*x for x in nums if x % 2 == 0]\n\n# Lazy pipeline = generator expression\nresult = (x*x for x in nums if x % 2 == 0)\n\n# itertools for advanced pipelines\nimport itertools\nevens = itertools.filterfalse(lambda x: x % 2, nums)\nsquares = map(lambda x: x*x, evens)"
+      },
+      "java": {
+        "definition": "Stream pipeline: SOURCE (list.stream(), Arrays.stream) -> INTERMEDIATE (map, filter, sorted, distinct — lazy, return new stream) -> TERMINAL (collect, forEach, reduce, count — triggers execution, returns value). Streams can't be reused after terminal op.",
+        "code": "List<Integer> nums = List.of(1,2,3,4,5,6);\n\n// Source -> Intermediate -> Terminal\nList<Integer> result = nums.stream()   // SOURCE\n    .filter(x -> x % 2 == 0)          // INTERMEDIATE (lazy)\n    .map(x -> x * x)                  // INTERMEDIATE (lazy)\n    .sorted()                         // INTERMEDIATE (lazy)\n    .toList();                        // TERMINAL -> List\n\n// Terminal ops: collect(toList()), forEach(),\n// reduce(0, Integer::sum), count(), findFirst()\nnums.stream().mapToInt(Integer::intValue).sum();"
+      },
+      "resources": [
+        { "label": "Java — Streams API", "url": "https://docs.oracle.com/javase/tutorial/collections/streams/index.html" }
+      ]
+    },
+    {
+      "id": "optional",
+      "title": "Optional — Null-Safe Values",
+      "learn": "Java's Optional vs Python's None handling.",
+      "python": {
+        "definition": "None = null equivalent. No Optional wrapper — use `x or default`, `if x is not None`, or walrus. Type hints Optional[int] document nullable intent.",
+        "code": "name = None\n\n# Safe access patterns\ngreeting = f\"Hi {name}\" if name else \"Hi guest\"\n# or: name = name or \"guest\"\n\nfrom typing import Optional\ndef find_user(id: int) -> Optional[dict]:\n    return users.get(id)   # may return None\n\nuser = find_user(1)\nif user is not None:\n    print(user[\"name\"])"
+      },
+      "java": {
+        "definition": "Optional<T> wraps a value that may be null — forces explicit handling. Methods: of(), ofNullable(), orElse(), orElseGet(), orElseThrow(), ifPresent(), map(), filter(). Never use Optional as field/param type (return types only).",
+        "code": "Optional<String> name = Optional.ofNullable(maybeNull);\n\n// Safe access\nString display = name.orElse(\"guest\");        // default\nString upper = name.map(String::toUpperCase)\n                   .orElse(\"NONE\");              // transform+default\nname.ifPresent(n -> System.out.println(n));      // if exists\n\n// orElseThrow -> exception if empty\nString req = name.orElseThrow(() ->\n    new IllegalStateException(\"name required\"));\n\n// BAD: Optional<String> field = ... (don't do this)"
+      },
+      "resources": [
+        { "label": "Java — Optional", "url": "https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html" }
+      ]
+    },
+    {
+      "id": "wrapper-classes",
+      "title": "Wrapper Classes",
+      "learn": "Object equivalents of primitives: Integer, Double, Boolean, etc.",
+      "python": {
+        "definition": "Python has NO wrapper classes — int, str, bool ARE objects already. Everything is an object; no primitive/wrapper split.",
+        "code": "x = 10           # already an object\nprint(type(x))      # <class 'int'>\nprint(x.bit_length())  # methods on int!\nprint((10).to_bytes(2, 'big'))\n\n# No Integer vs int distinction\n# No boxing/unboxing needed"
+      },
+      "java": {
+        "definition": "Wrapper classes box primitives into objects: Integer, Long, Double, Float, Boolean, Character, Byte, Short. Needed for collections (can't store primitives), generics, null values. Autoboxing/unboxing converts automatically.",
+        "code": "int primitive = 10;\nInteger wrapper = 10;         // autoboxing\nint back = wrapper;             // unboxing\n\nList<Integer> nums = new ArrayList<>();  // MUST use wrapper!\nnums.add(1); nums.add(2);\n\n// Utility methods\nInteger.parseInt(\"42\")       // String -> int\nInteger.toString(42)           // int -> String\nInteger.compare(1, 2)          // -1/0/1\nInteger.MAX_VALUE              // 2147483647\n\n// Cache: -128 to 127 cached\nInteger a = 127, b = 127;\nSystem.out.println(a == b);    // true (same cached object!)\nInteger c = 128, d = 128;\nSystem.out.println(c == d);    // FALSE (different objects!)"
+      },
+      "resources": [
+        { "label": "Java — Wrapper Classes", "url": "https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html" }
+      ]
+    },
+    {
+      "id": "final-keyword",
+      "title": "final Keyword & yield",
+      "learn": "final prevents modification; yield returns values from switch/generators.",
+      "python": {
+        "definition": "No final keyword — convention: UPPER_CASE for constants. yield = generator keyword (pause & return value). match/case has no yield.",
+        "code": "MAX_SIZE = 100          # convention = 'final'\n\ndef countdown(n):\n    while n > 0:\n        yield n       # pause & return value\n        n -= 1\n\n# yield from delegates to another generator\ndef outer():\n    yield from countdown(3)\n\n# No 'final' enforcement — just naming convention"
+      },
+      "java": {
+        "definition": "final variable = can't reassign; final method = can't override; final class = can't extend. yield = keyword in switch expressions returning a value (Java 14+).",
+        "code": "final int MAX = 100;         // can't reassign\nfinal class Config {}        // can't extend\nclass Base { final void init() {} }  // can't override\n\n// yield in switch expression\nString result = switch (day) {\n    case \"MON\" -> {\n        yield \"Start of week\";   // yield = return value\n    }\n    default -> \"Other\";\n};\n\n// Java has no generators — yield only in switch"
+      },
+      "resources": [
+        { "label": "Java — final", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/classvars.html" }
+      ]
+    },
+    {
+      "id": "dates-times",
+      "title": "Dates & Times",
+      "learn": "Working with dates, times and durations in both languages.",
+      "python": {
+        "definition": "datetime module: datetime (date+time), date, time, timedelta (duration). strptime/strftime for parsing/formatting. zoneinfo for timezones.",
+        "code": "from datetime import datetime, date, timedelta\n\nnow = datetime.now()\ntoday = date.today()\n\nprint(now.strftime(\"%Y-%m-%d %H:%M\"))  # format\nparsed = datetime.strptime(\"2024-01-15\", \"%Y-%m-%d\")\n\nfuture = today + timedelta(days=30)     # add duration\ndiff = future - today                    # timedelta\nprint(diff.days)\n\n# timezones\nfrom zoneinfo import ZoneInfo\nnow_est = datetime.now(ZoneInfo(\"America/New_York\"))"
+      },
+      "java": {
+        "definition": "java.time package (Java 8+): LocalDate, LocalTime, LocalDateTime, ZonedDateTime, Duration, Period, DateTimeFormatter. Immutable, thread-safe — replaces old Date/Calendar.",
+        "code": "import java.time.*;\nimport java.time.format.DateTimeFormatter;\n\nLocalDate today = LocalDate.now();\nLocalDateTime now = LocalDateTime.now();\n\nDateTimeFormatter fmt = DateTimeFormatter.ofPattern(\"yyyy-MM-dd\");\nSystem.out.println(today.format(fmt));\nLocalDate parsed = LocalDate.parse(\"2024-01-15\");\n\nLocalDate future = today.plusDays(30);    // add duration\nlong days = ChronoUnit.DAYS.between(today, future);\n\n// ZonedDateTime for timezones\nZonedDateTime est = ZonedDateTime.now(ZoneId.of(\"America/New_York\"));"
+      },
+      "resources": [
+        { "label": "Python — datetime", "url": "https://docs.python.org/3/library/datetime.html" },
+        { "label": "Java — java.time", "url": "https://docs.oracle.com/javase/tutorial/datetime/" }
+      ]
+    },
+    {
+      "id": "file-handling-deep",
+      "title": "File Handling — Deep Dive",
+      "learn": "Reading/writing files, directories, paths — both languages.",
+      "python": {
+        "definition": "pathlib.Path = modern way: read_text(), write_text(), glob(), mkdir(). open() still works. os module for system ops.",
+        "code": "from pathlib import Path\n\np = Path(\"data.txt\")\np.write_text(\"hello\")          # write\nprint(p.read_text())             # read\nprint(p.exists(), p.suffix)      # checks\n\nfor f in Path(\".\").glob(\"*.py\"):  # find files\n    print(f.name)\n\nPath(\"newdir\").mkdir(exist_ok=True)\n\n# Binary mode\np.write_bytes(b\"\\x00\\x01\")\n\n# os for system-level\nimport os\nprint(os.getcwd(), os.listdir())"
+      },
+      "java": {
+        "definition": "java.nio.file.Files + Path.of() = modern. Files.readString/writeString/readAllLines. File class = legacy. try-with-resources for streams.",
+        "code": "import java.nio.file.*;\nimport java.util.List;\n\nPath p = Path.of(\"data.txt\");\nFiles.writeString(p, \"hello\");          // write\nSystem.out.println(Files.readString(p)); // read\nSystem.out.println(Files.exists(p));      // check\n\nList<String> lines = Files.readAllLines(p);\nFiles.write(p, lines);                     // write lines\n\n// Find files\ntry (var stream = Files.list(Path.of(\".\"))) {\n    stream.filter(f -> f.toString().endsWith(\".java\"))\n          .forEach(System.out::println);\n}\n\nFiles.createDirectory(Path.of(\"newdir\"));"
+      },
+      "resources": [
+        { "label": "Python — pathlib", "url": "https://docs.python.org/3/library/pathlib.html" },
+        { "label": "Java — Files NIO", "url": "https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html" }
+      ]
+    },
+    {
+      "id": "math-functions",
+      "title": "Math Functions & Constants",
+      "learn": "pow, sqrt, round, floor, ceil, max, min, random.",
+      "python": {
+        "definition": "math module: pow, sqrt, floor, ceil, trunc, fabs, exp, log, sin/cos. round() = banker's rounding. random module for random. math.inf, math.pi constants.",
+        "code": "import math, random\n\nmath.pow(2, 10)        # 1024.0\nmath.sqrt(16)          # 4.0\nmath.floor(3.7)        # 3\nmath.ceil(3.2)         # 4\nround(3.5)            # 4 (banker's: round(2.5)=2!)\nmath.trunc(3.9)        # 3\nabs(-5)               # 5\nmax(1,2,3), min(1,2,3) # 3, 1\nrandom.randint(1, 10)  # random int\nrandom.random()       # 0.0-1.0\nmath.pi, math.e        # constants\nmath.isinf(float('inf'))"
+      },
+      "java": {
+        "definition": "Math class static methods: pow, sqrt, floor, ceil, round, abs, max, min, random. Strictfp for consistency. Math.PI, Math.E constants.",
+        "code": "Math.pow(2, 10)      // 1024.0\nMath.sqrt(16)        // 4.0\nMath.floor(3.7)      // 3.0\nMath.ceil(3.2)       // 4.0\nMath.round(3.5)      // 4 (half-up, NOT banker's!)\nMath.abs(-5)         // 5\nMath.max(1,2)        // 2 (only 2 args)\nMath.min(1,2)        // 1\nMath.random()        // 0.0-1.0\nThreadLocalRandom.current().nextInt(1,11) // random int\nMath.PI, Math.E      // constants"
+      },
+      "resources": [
+        { "label": "Python — math", "url": "https://docs.python.org/3/library/math.html" },
+        { "label": "Java — Math", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/Math.html" }
+      ]
+    },
+    {
+      "id": "string-comparison",
+      "title": "String Comparison",
+      "learn": "equals() vs ==, compareTo(), startsWith/endsWith/contains.",
+      "python": {
+        "definition": "== compares VALUE for strings. is compares IDENTITY (same object). .lower() before comparing for case-insensitive. compare via < > works lexicographically.",
+        "code": "a = \"hello\"; b = \"hello\"\nprint(a == b)        # True — value\nprint(a is b)        # True — interned (same object)\n\nc = \"hello \" + \"world\"[:0]  # new object\nprint(a is c)        # False!\n\n# Case-insensitive\nprint(a.lower() == \"HELLO\".lower())\n\n# Ordering\nprint(\"apple\" < \"banana\")  # True (lexicographic)"
+      },
+      "java": {
+        "definition": "== compares REFERENCE (same object in memory). equals() compares VALUE. compareTo() returns -1/0/1 for ordering. equalsIgnoreCase() for case-insensitive.",
+        "code": "String a = \"hello\";\nString b = \"hello\";\nString c = new String(\"hello\");\n\nSystem.out.println(a == b);            // true (pool — same object)\nSystem.out.println(a == c);            // FALSE! different objects\nSystem.out.println(a.equals(c));       // true — value!\nSystem.out.println(a.equalsIgnoreCase(\"HELLO\")); // true\n\nSystem.out.println(a.compareTo(b));    // 0 = equal\nSystem.out.println(\"apple\".compareTo(\"banana\")); // <0\n\n// ALWAYS use equals() for strings, never =="
+      },
+      "resources": [
+        { "label": "Java — String equals", "url": "https://docs.oracle.com/javase/tutorial/java/data/characters.html" }
+      ]
+    },
+    {
+      "id": "loop-control",
+      "title": "Loop Control — break, continue, else",
+      "learn": "Exiting/controlling loops; for-else in Python.",
+      "python": {
+        "definition": "break exits loop, continue skips to next. for...else / while...else runs else ONLY if loop completed WITHOUT break (like a 'no break' flag).",
+        "code": "for i in range(10):\n    if i == 5: break      # exit loop\n    if i == 2: continue   # skip iteration\n\n# for-else: runs if NO break happened\nfor i in range(3):\n    print(i)\nelse:\n    print(\"completed without break\")\n\n# while-else same idea\nn = 0\nwhile n < 3:\n    n += 1\nelse:\n    print(\"while done\")"
+      },
+      "java": {
+        "definition": "break exits innermost loop; continue skips to next iteration; labeled break/continue exits OUTER loop. No for-else — use a boolean flag.",
+        "code": "outer:\nfor (int i = 0; i < 3; i++) {\n    for (int j = 0; j < 3; j++) {\n        if (j == 1) continue;\n        if (i == 2) break outer;  // exits BOTH loops\n    }\n}\n\n// No for-else in Java — use flag:\nboolean found = false;\nfor (int x : arr) {\n    if (x == target) { found = true; break; }\n}\nif (!found) System.out.println(\"not found\");"
+      },
+      "resources": []
+    },
+    {
+      "id": "array-functions",
+      "title": "Array/List Functions — map, filter, reduce equivalents",
+      "learn": "JS-style array functions (map/filter/reduce/forEach/find) in Java & Python.",
+      "python": {
+        "definition": "List comprehensions + built-ins cover everything: map(), filter(), reduce() (functools), any/all, sorted with key.",
+        "code": "nums = [1, 2, 3, 4, 5]\n\n# JS map -> comprehension or map()\nsquares = [x*x for x in nums]\nsquares = list(map(lambda x: x*x, nums))\n\n# JS filter -> comprehension\nevens = [x for x in nums if x % 2 == 0]\n\n# JS reduce -> functools.reduce\nfrom functools import reduce\ntotal = reduce(lambda a, b: a + b, nums, 0)   # sum=15\n\n# forEach -> for loop\nfor x in nums: print(x)\n\n# find -> next()\nfirst_even = next(x for x in nums if x % 2 == 0)\n\n# includes -> in operator\nprint(3 in nums)   # True"
+      },
+      "java": {
+        "definition": "Streams replace all JS array functions: map(), filter(), reduce(), forEach(), findFirst(), anyMatch(), noneMatch(), allMatch().",
+        "code": "List<Integer> nums = List.of(1,2,3,4,5);\n\n// map\nnums.stream().map(x -> x * x).toList();\n// filter\nnums.stream().filter(x -> x % 2 == 0).toList();\n// reduce\nnums.stream().reduce(0, Integer::sum);  // 15\n// forEach\nnums.forEach(System.out::println);\n// find\nnums.stream().filter(x -> x % 2 == 0).findFirst();\n// includes -> contains\nnums.contains(3);   // true\n// every -> allMatch, some -> anyMatch"
+      },
+      "resources": []
+    },
+    {
+      "id": "http-status-codes",
+      "title": "HTTP Status Codes",
+      "learn": "200, 201, 400, 401, 403, 404, 500 — what each means and when to use.",
+      "python": {
+        "definition": "Django/DRF: return Response(data, status=201) or status.HTTP_201_CREATED. requests library: resp.status_code checks.",
+        "code": "from rest_framework.response import Response\nfrom rest_framework import status\n\n# Common codes:\n# 200 OK — success (GET, PUT)\n# 201 Created — resource created (POST)\n# 204 No Content — success, no body (DELETE)\n# 400 Bad Request — invalid input\n# 401 Unauthorized — not logged in\n# 403 Forbidden — logged in but no permission\n# 404 Not Found — resource missing\n# 500 Server Error — crash\n\nreturn Response(student, status=status.HTTP_201_CREATED)\nreturn Response({\"error\": \"invalid\"}, status=400)\n\nimport requests\nr = requests.get(url)\nprint(r.status_code)  # 200, 404, etc."
+      },
+      "java": {
+        "definition": "Spring: ResponseEntity.ok(body), .status(HttpStatus.CREATED), or return ResponseStatusException. Same HTTP semantics.",
+        "code": "// Spring status codes — same meanings:\n// 200 OK, 201 CREATED, 204 NO_CONTENT,\n// 400 BAD_REQUEST, 401 UNAUTHORIZED,\n// 403 FORBIDDEN, 404 NOT_FOUND, 500 INTERNAL_ERROR\n\n@GetMapping\npublic ResponseEntity<Student> get(@PathVariable Long id) {\n    return repo.findById(id)\n        .map(ResponseEntity::ok)                    // 200\n        .orElse(ResponseEntity.notFound().build()); // 404\n}\n\n@PostMapping\npublic ResponseEntity<Student> create(@Valid @RequestBody StudentDto d) {\n    return ResponseEntity.status(HttpStatus.CREATED)\n        .body(service.save(d));                     // 201\n}\n\n@DeleteMapping(\"/{id}\")\npublic ResponseEntity<Void> delete(@PathVariable Long id) {\n    service.delete(id);\n    return ResponseEntity.noContent().build();      // 204\n}"
+      },
+      "resources": [
+        { "label": "HTTP Status Codes", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" }
+      ]
+    },
+    {
+      "id": "relationships-detail",
+      "title": "Relationships — One-to-One, One-to-Many, Many-to-Many",
+      "learn": "How entity relationships map in Django ORM vs JPA.",
+      "python": {
+        "definition": "ForeignKey = many-to-one (student->course). OneToOneField = 1:1. ManyToManyField = n:n (auto junction table). related_name for reverse access.",
+        "code": "class Student(models.Model):\n    name = models.CharField(max_length=100)\n\nclass Course(models.Model):\n    title = models.CharField(max_length=100)\n    # Many-to-Many\n    students = models.ManyToManyField(Student, related_name=\"courses\")\n\n# One-to-Many: FK on the 'many' side\nclass Enrollment(models.Model):\n    student = models.ForeignKey(Student, on_delete=models.CASCADE)\n    course = models.ForeignKey(Course, on_delete=models.CASCADE)\n\n# One-to-One\nclass Profile(models.Model):\n    user = models.OneToOneField(User, on_delete=models.CASCADE)"
+      },
+      "java": {
+        "definition": "@ManyToOne (many side has FK), @OneToMany (inverse), @OneToOne, @ManyToMany (join table auto-created). mappedBy for inverse side. CascadeType for propagation.",
+        "code": "@Entity class Student {\n    @Id Long id;\n    @ManyToMany List<Course> courses;  // n:n\n}\n\n@Entity class Enrollment {\n    @Id Long id;\n    @ManyToOne Student student;         // n:1 (FK here)\n    @ManyToOne Course course;\n}\n\n@Entity class Profile {\n    @Id Long id;\n    @OneToOne User user;                // 1:1\n}\n\n// Course side (inverse):\n@OneToMany(mappedBy = \"course\")\nList<Enrollment> enrollments;\n// Cascade: @OneToMany(cascade = CascadeType.ALL)"
+      },
+      "resources": [
+        { "label": "JPA Relationships", "url": "https://jakarta.ee/specifications/persistence/" }
+      ]
+    },
+    {
+      "id": "bodmas-precedence",
+      "title": "BODMAS — Operator Precedence Deep Dive",
+      "learn": "Exact order of operations with examples both languages execute.",
+      "python": {
+        "definition": "Precedence high->low: () [] {} -> ** (right-assoc) -> +x -x ~x (unary) -> * @ / // % -> + - -> << >> -> & -> ^ -> | -> comparisons -> not -> and -> or -> if-else -> lambda -> :=. Key gotcha: ** binds tighter than unary on LEFT.",
+        "code": "# BODMAS examples — verify yourself:\nprint(2 + 3 * 4 ** 2)     # 2 + 3*16 = 50\nprint((2 + 3) * 4 ** 2)   # 5 * 16 = 80\nprint(10 - 4 - 3)         # 3 — LEFT assoc!\nprint(2 ** 3 ** 2)        # 512 — RIGHT assoc\nprint(-2 ** 2)            # -4 — ** before unary!\nprint(not True == False)  # True — == before not\nprint(1 if True else 0)   # ternary lowest\n\n# Java differences: / always true division for int?\n# NO — Java int/int = int! Python / always float"
+      },
+      "java": {
+        "definition": "Precedence high->low: () [] . -> ++ -- unary + - ! ~ -> * / % -> + - -> << >> >>> -> < <= > >= instanceof -> == != -> & -> ^ -> | -> && -> || -> ?: -> = += etc. Multiplicative before additive; shifts before relational.",
+        "code": "// BODMAS — same order as math:\nSystem.out.println(2 + 3 * 4);      // 14\nSystem.out.println((2 + 3) * 4);    // 20\nSystem.out.println(10 - 4 - 3);     // 3 (left assoc)\nSystem.out.println(2 * 3 % 4);      // 2 (* and % same level, left)\nSystem.out.println(1 << 2 + 1);     // 8 — + before <<!\nSystem.out.println(5 > 3 && 2 < 4); // true\nSystem.out.println(-2 * -3);        // 6\n\n// GOTCHA: int division\nSystem.out.println(7 / 2);          // 3 (int!)\nSystem.out.println(7.0 / 2);        // 3.5\nSystem.out.println(7 % 2);          // 1"
+      },
+      "resources": [
+        { "label": "Python precedence", "url": "https://docs.python.org/3/reference/expressions.html#operator-precedence" }
+      ]
+    },
+    {
+      "id": "type-checking",
+      "title": "Checking Data Types at Runtime",
+      "learn": "How to inspect and verify types in both languages.",
+      "python": {
+        "definition": "type(x) returns the class; isinstance(x, cls) checks inheritance; issubclass for classes. Type hints don't enforce at runtime.",
+        "code": "x = 10\nprint(type(x))                    # <class 'int'>\nprint(isinstance(x, int))         # True\nprint(isinstance(x, (int, float))) # True — tuple of types\n\nclass Animal: pass\nclass Dog(Animal): pass\nprint(isinstance(Dog(), Animal))   # True — inheritance!\n\n# Type hint (not enforced)\ndef add(a: int, b: int) -> int: return a + b\nadd(\"1\", \"2\")  # still works — returns '12'!"
+      },
+      "java": {
+        "definition": "obj.getClass() returns runtime class; instanceof checks type (incl. subclasses); getClass() == Class.class for exact match. Compile-time types vs runtime types differ with polymorphism.",
+        "code": "Object obj = \"hello\";\nSystem.out.println(obj.getClass());        // class java.lang.String\nSystem.out.println(obj instanceof String);  // true\n\nAnimal a = new Dog();\nSystem.out.println(a instanceof Dog);       // true — runtime type!\nSystem.out.println(a.getClass() == Dog.class); // exact match\n\n// Pattern matching (Java 16+)\nif (obj instanceof String s) {\n    System.out.println(s.toUpperCase());  // s auto-cast\n}\n\n// Compile vs runtime:\n// Animal a = new Dog(); a.speak() — Dog's speak() runs (polymorphism)"
+      },
+      "resources": [
+        { "label": "Python — isinstance", "url": "https://docs.python.org/3/library/functions.html#isinstance" },
+        { "label": "Java — instanceof", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/objectoriented.html" }
+      ]
+    }
+  ]
+}

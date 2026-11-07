@@ -1,0 +1,357 @@
+{
+  "section": {
+    "id": "basics",
+    "title": "Python vs Java — Basics",
+    "subtitle": "Syntax, variables, data types, operators, control flow, collections, functions, exceptions and file handling."
+  },
+  "leftLabel": "Python",
+  "rightLabel": "Java",
+  "leftColor": "#3776ab",
+  "rightColor": "#b07219",
+  "topics": [
+    {
+      "id": "syntax-variables",
+      "title": "Syntax & Variables",
+      "learn": "How code is written and variables are declared in each language.",
+      "python": {
+        "definition": "Python uses indentation (whitespace) to define blocks. Variables are created by assignment — no keyword is needed, and the type is inferred dynamically.",
+        "code": "# No declaration keyword needed\nname = \"Alice\"\nage = 25\nprice = 19.99\n\nprint(name, age, price)"
+      },
+      "java": {
+        "definition": "Java is strongly typed and statically typed. Every variable needs a type and variables are declared inside blocks delimited by curly braces { }.",
+        "code": "// Type is mandatory\nString name = \"Alice\";\nint age = 25;\ndouble price = 19.99;\n\nSystem.out.println(name + \" \" + age + \" \" + price);"
+      },
+      "resources": [
+        { "label": "Python docs — Variables", "url": "https://docs.python.org/3/tutorial/introduction.html" },
+        { "label": "Java docs — Variables", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/variables.html" }
+      ]
+    },
+    {
+      "id": "print-statements",
+      "title": "Print Statements",
+      "learn": "Outputting text to the console.",
+      "python": {
+        "definition": "print() is a built-in function. Multiple values are separated by commas, and f-strings (f\"...\") embed variables directly.",
+        "code": "name = \"Bob\"\nage = 30\n\nprint(\"Hello\", name)          # Hello Bob\nprint(f\"Age: {age}\")            # f-string\nprint(\"Age:\", age, \"years\")    # Age: 30 years"
+      },
+      "java": {
+        "definition": "System.out.println() prints a line. String concatenation uses the + operator; no f-strings exist (use String.format or text blocks).",
+        "code": "String name = \"Bob\";\nint age = 30;\n\nSystem.out.println(\"Hello \" + name);       // Hello Bob\nSystem.out.println(\"Age: \" + age);         // Age: 30\nSystem.out.printf(\"Age: %d years%n\", age); // formatted"
+      },
+      "resources": [
+        { "label": "Python — print()", "url": "https://docs.python.org/3/library/functions.html#print" },
+        { "label": "Java — System.out", "url": "https://docs.oracle.com/javase/tutorial/java/data/numberformat.html" }
+      ]
+    },
+    {
+      "id": "data-types-casting",
+      "title": "Data Types & Type Casting",
+      "learn": "Built-in types and converting between them.",
+      "python": {
+        "definition": "Python has dynamic typing — a variable's type can change. int, float, str, bool, list, dict, set, tuple are common types. Casting uses int(), float(), str().",
+        "code": "x = 10            # int\ny = 3.14          # float\nz = \"42\"          # str\n\na = int(z)          # 42 (str -> int)\nb = float(a)        # 42.0\nc = str(b)          # \"42.0\"\nd = bool(0)         # False\n\nprint(type(x), type(y))"
+      },
+      "java": {
+        "definition": "Java is statically typed — the type is fixed at compile time. Primitive types: int, double, boolean, char. Wrapper classes: Integer, Double, Boolean. Casting uses (type) or parse methods.",
+        "code": "int x = 10;\ndouble y = 3.14;\nString z = \"42\";\n\nint a = Integer.parseInt(z);   // \"42\" -> 42\ndouble b = Double.parseDouble(z);\nString c = Integer.toString(a);\nboolean d = (x > 5);\n\nSystem.out.println(x + \" \" + y);"
+      },
+      "resources": [
+        { "label": "Python — Built-in Types", "url": "https://docs.python.org/3/library/stdtypes.html" },
+        { "label": "Java — Primitive Types", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" }
+      ]
+    },
+    {
+      "id": "operators",
+      "title": "Operators",
+      "learn": "Arithmetic, comparison and logical operators.",
+      "python": {
+        "definition": "Arithmetic: + - * / // % **. Comparison: == != < > <= >=. Logical: and, or, not. String concatenation uses +.",
+        "code": "a, b = 10, 3\n\nprint(a + b, a - b, a * b)   # 13 7 30\nprint(a / b)                   # 3.33 (float)\nprint(a // b, a % b, a ** b)    # 3 1 1000\n\nprint(a > b, a == b)            # True False\nprint(a > 5 and b < 5)          # True\nprint(not (a < b))              # True"
+      },
+      "java": {
+        "definition": "Arithmetic: + - * / % (no ** operator). Integer division with / truncates. Comparison and logical operators are the same but use &&, ||, ! instead of words.",
+        "code": "int a = 10, b = 3;\n\nSystem.out.println(a + b + \" \" + (a - b) + \" \" + (a * b)); // 13 7 30\nSystem.out.println((double) a / b);   // 3.33\nSystem.out.println(a / b + \" \" + a % b); // 3 1\n\nSystem.out.println(a > b && b < 5);   // true\nSystem.out.println(!(a < b));         // true"
+      },
+      "resources": [
+        { "label": "Python — Operators", "url": "https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex" },
+        { "label": "Java — Operators", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/operators.html" }
+      ]
+    },
+    {
+      "id": "if-else",
+      "title": "If, Else, Elif",
+      "learn": "Decision-making programs.",
+      "python": {
+        "definition": "if / elif / else blocks are defined by indentation. Conditions use ==, !=, <, >, and/or/not.",
+        "code": "marks = 85\n\nif marks >= 90:\n    grade = \"A\"\nelif marks >= 75:\n    grade = \"B\"\nelif marks >= 60:\n    grade = \"C\"\nelse:\n    grade = \"F\"\n\nprint(\"Grade:\", grade)   # Grade: A"
+      },
+      "java": {
+        "definition": "if / else if / else blocks are defined by curly braces. The keyword is else if (two words), not elif.",
+        "code": "int marks = 85;\nString grade;\n\nif (marks >= 90) {\n    grade = \"A\";\n} else if (marks >= 75) {\n    grade = \"B\";\n} else if (marks >= 60) {\n    grade = \"C\";\n} else {\n    grade = \"F\";\n}\n\nSystem.out.println(\"Grade: \" + grade); // Grade: A"
+      },
+      "resources": [
+        { "label": "Python — if statements", "url": "https://docs.python.org/3/tutorial/controlflow.html#if-statements" },
+        { "label": "Java — If-Then-Else", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/if.html" }
+      ]
+    },
+    {
+      "id": "loops",
+      "title": "For Loop & While Loop",
+      "learn": "Repeated operations.",
+      "python": {
+        "definition": "for iterates directly over sequences (range, lists, strings). while repeats while a condition is true. Loop variables are implicitly declared.",
+        "code": "# for loop over a range\nfor i in range(1, 5):        # 1..4\n    print(i)\n\n# for loop over a list\nfor name in [\"a\", \"b\", \"c\"]:\n    print(name)\n\n# while loop\nn = 0\nwhile n < 3:\n    print(\"n =\", n)\n    n += 1"
+      },
+      "java": {
+        "definition": "for uses C-style syntax: for(init; condition; update). Enhanced for iterates over arrays/collections. The loop variable must be declared with a type.",
+        "code": "// classic for loop\nfor (int i = 1; i < 5; i++) {   // 1..4\n    System.out.println(i);\n}\n\n// enhanced for loop\nfor (String name : new String[]{\"a\", \"b\", \"c\"}) {\n    System.out.println(name);\n}\n\n// while loop\nint n = 0;\nwhile (n < 3) {\n    System.out.println(\"n = \" + n);\n    n++;\n}"
+      },
+      "resources": [
+        { "label": "Python — Loops", "url": "https://docs.python.org/3/tutorial/controlflow.html#for-statements" },
+        { "label": "Java — For Loops", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html" }
+      ]
+    },
+    {
+      "id": "strings",
+      "title": "Strings",
+      "learn": "String manipulation.",
+      "python": {
+        "definition": "Strings are immutable sequences of characters. Supports slicing, methods like upper(), split(), replace(), and f-strings for formatting.",
+        "code": "s = \"Hello World\"\n\nprint(s.upper())          # HELLO WORLD\nprint(s[0:5])             # Hello (slice)\nprint(s.replace(\"World\", \"Python\"))\nprint(len(s), s.split())  # 11 ['Hello', 'World']\n\nname = \"Sam\"\nprint(f\"Hi {name}\")      # Hi Sam"
+      },
+      "java": {
+        "definition": "Strings are immutable objects of class String. Methods: toUpperCase(), substring(), replace(), split(). Length via length(). Use StringBuilder for heavy mutation.",
+        "code": "String s = \"Hello World\";\n\nSystem.out.println(s.toUpperCase());      // HELLO WORLD\nSystem.out.println(s.substring(0, 5));     // Hello\nSystem.out.println(s.replace(\"World\", \"Java\"));\nSystem.out.println(s.length() + \" \" + s.split(\" \")[0]);\n\nString name = \"Sam\";\nSystem.out.println(\"Hi \" + name);         // Hi Sam"
+      },
+      "resources": [
+        { "label": "Python — Strings", "url": "https://docs.python.org/3/library/stdtypes.html#string-methods" },
+        { "label": "Java — Strings", "url": "https://docs.oracle.com/javase/tutorial/java/data/characters.html" }
+      ]
+    },
+    {
+      "id": "collections",
+      "title": "Lists, Tuples, Sets",
+      "learn": "Collections — ordered and unordered groups of items.",
+      "python": {
+        "definition": "list = ordered, mutable, allows duplicates [ ]. tuple = ordered, immutable ( ). set = unordered, unique items { }. All support len() and iteration.",
+        "code": "my_list = [1, 2, 3]\nmy_tuple = (1, 2, 3)\nmy_set = {1, 2, 3, 3}   # duplicates removed\n\nmy_list.append(4)          # [1, 2, 3, 4]\nmy_list[0] = 10             # [10, 2, 3, 4]\nprint(len(my_list), my_set) # 4 {1, 2, 3}"
+      },
+      "java": {
+        "definition": "ArrayList = ordered, resizable list. Arrays are fixed-size. HashSet = unordered unique items. Tuples don't exist; use arrays or List.of().",
+        "code": "import java.util.*;\n\nList<Integer> myList = new ArrayList<>(List.of(1, 2, 3));\nSet<Integer> mySet = new HashSet<>(List.of(1, 2, 3, 3));\n\nmyList.add(4);             // [1, 2, 3, 4]\nmyList.set(0, 10);          // [10, 2, 3, 4]\nSystem.out.println(myList.size() + \" \" + mySet); // 4 [1, 2, 3]"
+      },
+      "resources": [
+        { "label": "Python — Lists", "url": "https://docs.python.org/3/tutorial/datastructures.html" },
+        { "label": "Java — Collections", "url": "https://docs.oracle.com/javase/tutorial/collections/" }
+      ]
+    },
+    {
+      "id": "dictionaries",
+      "title": "Dictionaries / Maps",
+      "learn": "Key-value operations.",
+      "python": {
+        "definition": "dict stores key-value pairs with {}. Keys must be unique and hashable. Access via d[key], methods: get(), keys(), values(), items().",
+        "code": "student = {\"name\": \"Priya\", \"age\": 20, \"course\": \"CS\"}\n\nprint(student[\"name\"])        # Priya\nstudent[\"age\"] = 21            # update\nstudent[\"grade\"] = \"A\"         # add\nprint(student.get(\"missing\", \"N/A\"))  # N/A\nprint(list(student.keys()))"
+      },
+      "java": {
+        "definition": "Map<K,V> interface — HashMap is the common implementation. Access via map.get(key), put(key, value). Keys must be unique.",
+        "code": "import java.util.*;\n\nMap<String, Object> student = new HashMap<>();\nstudent.put(\"name\", \"Priya\");\nstudent.put(\"age\", 20);\n\nSystem.out.println(student.get(\"name\"));   // Priya\nstudent.put(\"age\", 21);                     // update\nstudent.put(\"grade\", \"A\");                 // add\nSystem.out.println(student.getOrDefault(\"missing\", \"N/A\"));"
+      },
+      "resources": [
+        { "label": "Python — Dictionaries", "url": "https://docs.python.org/3/tutorial/datastructures.html#dictionaries" },
+        { "label": "Java — Map Interface", "url": "https://docs.oracle.com/javase/tutorial/collections/interfaces/map.html" }
+      ]
+    },
+    {
+      "id": "functions",
+      "title": "Functions",
+      "learn": "Parameters and return values.",
+      "python": {
+        "definition": "def defines a function. Parameters can have defaults and *args/**kwargs. return exits with a value; no return means None.",
+        "code": "def add(a, b=10):\n    return a + b\n\ndef greet(name):\n    print(f\"Hello {name}\")   # returns None\n\nprint(add(5))        # 15\nprint(add(5, 3))     # 8\ngreet(\"Sam\")        # Hello Sam"
+      },
+      "java": {
+        "definition": "Methods are declared inside a class with a return type. void means no return. No default parameter values — use method overloading or Optional.",
+        "code": "public class Main {\n    static int add(int a, int b) {\n        return a + b;\n    }\n    static void greet(String name) {\n        System.out.println(\"Hello \" + name);\n    }\n    public static void main(String[] args) {\n        System.out.println(add(5, 10)); // 15\n        greet(\"Sam\");\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — Functions", "url": "https://docs.python.org/3/tutorial/controlflow.html#defining-functions" },
+        { "label": "Java — Methods", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/methods.html" }
+      ]
+    },
+    {
+      "id": "exceptions",
+      "title": "Exception Handling",
+      "learn": "Try, except/finally — handling errors gracefully.",
+      "python": {
+        "definition": "try / except / else / finally. Catch specific exceptions (ValueError, ZeroDivisionError) or use bare except. finally always runs.",
+        "code": "try:\n    result = 10 / int(input(\"num: \"))\nexcept ZeroDivisionError:\n    print(\"Cannot divide by zero\")\nexcept ValueError:\n    print(\"Invalid number\")\nelse:\n    print(\"Result:\", result)\nfinally:\n    print(\"Done\")"
+      },
+      "java": {
+        "definition": "try / catch / finally. Catch specific exception types. Exceptions are objects; use try-with-resources for auto-closing.",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        try {\n            int n = Integer.parseInt(args[0]);\n            System.out.println(10 / n);\n        } catch (NumberFormatException e) {\n            System.out.println(\"Invalid number\");\n        } catch (ArithmeticException e) {\n            System.out.println(\"Cannot divide by zero\");\n        } finally {\n            System.out.println(\"Done\");\n        }\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — Errors and Exceptions", "url": "https://docs.python.org/3/tutorial/errors.html" },
+        { "label": "Java — Exceptions", "url": "https://docs.oracle.com/javase/tutorial/essential/exceptions/" }
+      ]
+    },
+    {
+      "id": "file-handling",
+      "title": "File Handling",
+      "learn": "Reading and writing files.",
+      "python": {
+        "definition": "open() returns a file object — use with for auto-close. Modes: 'r' read, 'w' write, 'a' append. read(), readline(), readlines(), write().",
+        "code": "# Write\nwith open(\"data.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\")\n\n# Read\nwith open(\"data.txt\", \"r\") as f:\n    content = f.read()\n    print(content)\n\n# Line by line\nwith open(\"data.txt\") as f:\n    for line in f:\n        print(line.strip())"
+      },
+      "java": {
+        "definition": "java.nio.file.Files with Path.of() is modern; older code uses FileReader/FileWriter/BufferedReader. try-with-resources closes files automatically.",
+        "code": "import java.nio.file.*;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        // Write\n        Files.writeString(Path.of(\"data.txt\"), \"Hello\\nWorld\\n\");\n        // Read all\n        System.out.println(Files.readString(Path.of(\"data.txt\")));\n        // Read lines\n        for (String line : Files.readAllLines(Path.of(\"data.txt\"))) {\n            System.out.println(line.trim());\n        }\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — Files and I/O", "url": "https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files" },
+        { "label": "Java — Files (NIO)", "url": "https://docs.oracle.com/javase/tutorial/essential/io/fileOps.html" }
+      ]
+    },
+    {
+      "id": "exercise-even-odd",
+      "title": "Exercise: Even or Odd",
+      "learn": "Practice: check whether a number is even or odd.",
+      "python": {
+        "definition": "Use the modulo operator % — a number is even when n % 2 == 0.",
+        "code": "num = int(input(\"Enter a number: \"))\n\nif num % 2 == 0:\n    print(num, \"is even\")\nelse:\n    print(num, \"is odd\")"
+      },
+      "java": {
+        "definition": "Same logic — % gives the remainder; even numbers have remainder 0.",
+        "code": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int num = sc.nextInt();\n        if (num % 2 == 0) {\n            System.out.println(num + \" is even\");\n        } else {\n            System.out.println(num + \" is odd\");\n        }\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-largest-three",
+      "title": "Exercise: Largest of Three Numbers",
+      "learn": "Practice: find the largest of three numbers.",
+      "python": {
+        "definition": "Compare pairwise with if statements, or use the built-in max().",
+        "code": "a, b, c = map(int, input(\"Enter 3 numbers: \").split())\n\n# Using max()\nprint(\"Largest:\", max(a, b, c))\n\n# Without max()\nlargest = a\nif b > largest: largest = b\nif c > largest: largest = c\nprint(\"Largest:\", largest)"
+      },
+      "java": {
+        "definition": "Use Math.max() twice, or nested ternary/if comparisons.",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        int a = 12, b = 45, c = 23;\n        int largest = Math.max(a, Math.max(b, c));\n        System.out.println(\"Largest: \" + largest);\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-reverse-string",
+      "title": "Exercise: Reverse a String",
+      "learn": "Practice: reverse a string.",
+      "python": {
+        "definition": "Slicing with a negative step s[::-1] reverses a string in one line.",
+        "code": "s = input(\"Enter a string: \")\nprint(\"Reversed:\", s[::-1])\n\n# Without slicing\nreversed_s = \"\".join(reversed(s))\nprint(reversed_s)"
+      },
+      "java": {
+        "definition": "StringBuilder.reverse() is the standard way; or iterate backwards.",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        String s = \"hello\";\n        String reversed = new StringBuilder(s).reverse().toString();\n        System.out.println(\"Reversed: \" + reversed);\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-palindrome",
+      "title": "Exercise: Palindrome Check",
+      "learn": "Practice: check whether a word is a palindrome.",
+      "python": {
+        "definition": "A palindrome reads the same forwards and backwards. Compare s with s[::-1].",
+        "code": "word = input(\"Enter a word: \").lower().strip()\n\nif word == word[::-1]:\n    print(word, \"is a palindrome\")\nelse:\n    print(word, \"is not a palindrome\")"
+      },
+      "java": {
+        "definition": "Compare characters from both ends, or reverse the string and compare with equals().",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        String word = \"level\".toLowerCase();\n        String rev = new StringBuilder(word).reverse().toString();\n        if (word.equals(rev)) {\n            System.out.println(word + \" is a palindrome\");\n        } else {\n            System.out.println(word + \" is not a palindrome\");\n        }\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-factorial",
+      "title": "Exercise: Factorial",
+      "learn": "Practice: find factorial of a number (n! = n × (n-1) × ... × 1).",
+      "python": {
+        "definition": "Use a for loop accumulating the product, or math.factorial(), or recursion.",
+        "code": "import math\n\nn = int(input(\"Enter a number: \"))\n\n# Loop\nfact = 1\nfor i in range(1, n + 1):\n    fact *= i\nprint(f\"{n}! = {fact}\")\n\n# Built-in\nprint(math.factorial(n))"
+      },
+      "java": {
+        "definition": "Use a for loop with a long accumulator, or recursion.",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        int n = 5;\n        long fact = 1;\n        for (int i = 1; i <= n; i++) {\n            fact *= i;\n        }\n        System.out.println(n + \"! = \" + fact);\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-prime",
+      "title": "Exercise: Prime Numbers",
+      "learn": "Practice: find prime numbers up to N.",
+      "python": {
+        "definition": "A prime has exactly two divisors: 1 and itself. Test divisibility up to sqrt(n).",
+        "code": "def is_prime(n):\n    if n < 2: return False\n    for i in range(2, int(n ** 0.5) + 1):\n        if n % i == 0: return False\n    return True\n\nlimit = int(input(\"Find primes up to: \"))\nprimes = [n for n in range(2, limit + 1) if is_prime(n)]\nprint(primes)"
+      },
+      "java": {
+        "definition": "Same algorithm — loop i from 2 to sqrt(n), check n % i.",
+        "code": "public class Main {\n    static boolean isPrime(int n) {\n        if (n < 2) return false;\n        for (int i = 2; i <= Math.sqrt(n); i++) {\n            if (n % i == 0) return false;\n        }\n        return true;\n    }\n    public static void main(String[] args) {\n        for (int n = 2; n <= 30; n++) {\n            if (isPrime(n)) System.out.print(n + \" \");\n        }\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-vowels",
+      "title": "Exercise: Count Vowels",
+      "learn": "Practice: count vowels in a sentence.",
+      "python": {
+        "definition": "Iterate characters, convert to lowercase, check membership in 'aeiou'.",
+        "code": "sentence = input(\"Enter a sentence: \").lower()\nvowels = \"aeiou\"\ncount = sum(1 for ch in sentence if ch in vowels)\nprint(\"Vowel count:\", count)"
+      },
+      "java": {
+        "definition": "Loop through chars, use String.contains or a switch on lowercased char.",
+        "code": "public class Main {\n    public static void main(String[] args) {\n        String sentence = \"Hello World\".toLowerCase();\n        String vowels = \"aeiou\";\n        int count = 0;\n        for (char ch : sentence.toCharArray()) {\n            if (vowels.indexOf(ch) != -1) count++;\n        }\n        System.out.println(\"Vowel count: \" + count);\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-duplicates",
+      "title": "Exercise: Duplicate Elements",
+      "learn": "Practice: find duplicate elements in a list.",
+      "python": {
+        "definition": "Use a set to track seen items; report items seen twice.",
+        "code": "items = [1, 2, 2, 3, 4, 4, 4, 5]\n\nseen = set()\nduplicates = set()\nfor x in items:\n    if x in seen:\n        duplicates.add(x)\n    seen.add(x)\n\nprint(\"Duplicates:\", duplicates)   # {2, 4}"
+      },
+      "java": {
+        "definition": "Use HashSet to track seen; HashSet duplicates for results.",
+        "code": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> items = List.of(1, 2, 2, 3, 4, 4, 4, 5);\n        Set<Integer> seen = new HashSet<>();\n        Set<Integer> dup = new HashSet<>();\n        for (int x : items) {\n            if (!seen.add(x)) dup.add(x);\n        }\n        System.out.println(\"Duplicates: \" + dup); // [2, 4]\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-calculator",
+      "title": "Exercise: Simple Calculator",
+      "learn": "Practice: create a simple calculator.",
+      "python": {
+        "definition": "Read two numbers and an operator, use if/elif for each operation.",
+        "code": "a = float(input(\"First number: \"))\nop = input(\"Operator (+ - * /): \")\nb = float(input(\"Second number: \"))\n\nif op == \"+\": result = a + b\nelif op == \"-\": result = a - b\nelif op == \"*\": result = a * b\nelif op == \"/\" and b != 0: result = a / b\nelse: result = \"Invalid input\"\n\nprint(f\"{a} {op} {b} = {result}\")"
+      },
+      "java": {
+        "definition": "Same approach — switch or if-else on the operator character.",
+        "code": "import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double a = sc.nextDouble();\n        char op = sc.next().charAt(0);\n        double b = sc.nextDouble();\n        double result;\n        switch (op) {\n            case '+' -> result = a + b;\n            case '-' -> result = a - b;\n            case '*' -> result = a * b;\n            case '/' -> result = a / b;\n            default -> { result = 0; System.out.println(\"Invalid op\"); }\n        }\n        System.out.println(a + \" \" + op + \" \" + b + \" = \" + result);\n    }\n}"
+      },
+      "resources": []
+    },
+    {
+      "id": "exercise-student-marks",
+      "title": "Exercise: Student Marks Management",
+      "learn": "Practice: a student marks management program.",
+      "python": {
+        "definition": "Store students in a list of dicts, compute total/percentage/grade, display a report.",
+        "code": "students = []\n\nfor _ in range(3):\n    name = input(\"Name: \")\n    marks = list(map(int, input(\"Marks (3): \").split()))\n    total = sum(marks)\n    pct = total / 3\n    grade = \"A\" if pct >= 90 else \"B\" if pct >= 75 else \"C\"\n    students.append({\"name\": name, \"total\": total, \"pct\": pct, \"grade\": grade})\n\nfor s in students:\n    print(f\"{s['name']}: {s['total']}/300 ({s['pct']:.1f}%) Grade {s['grade']}\")"
+      },
+      "java": {
+        "definition": "Use a Student class with fields, an ArrayList<Student>, and a loop to print the report.",
+        "code": "import java.util.*;\n\nclass Student {\n    String name; int total; double pct; String grade;\n    Student(String n, int[] marks) {\n        name = n; total = 0;\n        for (int m : marks) total += m;\n        pct = total / 3.0;\n        grade = pct >= 90 ? \"A\" : pct >= 75 ? \"B\" : \"C\";\n    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Student> list = new ArrayList<>();\n        list.add(new Student(\"Priya\", new int[]{90, 85, 88}));\n        for (Student s : list)\n            System.out.printf(\"%s: %d/300 (%.1f%%) Grade %s%n\", s.name, s.total, s.pct, s.grade);\n    }\n}"
+      },
+      "resources": []
+    }
+  ]
+}

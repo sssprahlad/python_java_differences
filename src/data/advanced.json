@@ -1,0 +1,217 @@
+{
+  "section": {
+    "id": "advanced",
+    "title": "Python vs Java — Advanced",
+    "subtitle": "OOP, functional programming, decorators, generators, modules, virtual environments, JSON and APIs."
+  },
+  "leftLabel": "Python",
+  "rightLabel": "Java",
+  "leftColor": "#3776ab",
+  "rightColor": "#b07219",
+  "topics": [
+    {
+      "id": "oop",
+      "title": "OOP — Class, Object, Inheritance, Polymorphism",
+      "learn": "Object-oriented programming fundamentals.",
+      "python": {
+        "definition": "class defines an object blueprint; __init__ is the constructor; self refers to the instance. Inheritance via class Child(Parent), polymorphism via method overriding.",
+        "code": "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return \"...\"\n\nclass Dog(Animal):\n    def speak(self):          # override\n        return \"Woof!\"\n\nd = Dog(\"Rex\")\nprint(d.name, d.speak())    # Rex Woof!"
+      },
+      "java": {
+        "definition": "class defines the blueprint; constructor has the class name; this refers to the instance. Inheritance via extends; polymorphism via @Override methods.",
+        "code": "class Animal {\n    String name;\n    Animal(String name) { this.name = name; }\n    String speak() { return \"...\"; }\n}\n\nclass Dog extends Animal {\n    Dog(String name) { super(name); }\n    @Override String speak() { return \"Woof!\"; }\n}\n\nDog d = new Dog(\"Rex\");\nSystem.out.println(d.name + \" \" + d.speak()); // Rex Woof!"
+      },
+      "resources": [
+        { "label": "Python — Classes", "url": "https://docs.python.org/3/tutorial/classes.html" },
+        { "label": "Java — Classes", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/classes.html" }
+      ]
+    },
+    {
+      "id": "encapsulation",
+      "title": "Encapsulation",
+      "learn": "Public, protected, private conventions — hiding internal data.",
+      "python": {
+        "definition": "No true private keyword — convention uses a single underscore _attr (protected-ish) or double underscore __attr (name-mangled). @property gives getter/setter behaviour.",
+        "code": "class BankAccount:\n    def __init__(self, balance):\n        self.__balance = balance   # \"private\"\n\n    @property\n    def balance(self):           # getter\n        return self.__balance\n\n    def deposit(self, amount):\n        self.__balance += amount\n\nacc = BankAccount(100)\nacc.deposit(50)\nprint(acc.balance)            # 150"
+      },
+      "java": {
+        "definition": "private fields with public getter/setter methods enforce encapsulation strictly at compile time.",
+        "code": "public class BankAccount {\n    private double balance;         // private\n    public BankAccount(double b) { balance = b; }\n    public double getBalance() { return balance; }\n    public void deposit(double amt) { balance += amt; }\n}\n\nBankAccount acc = new BankAccount(100);\nacc.deposit(50);\nSystem.out.println(acc.getBalance()); // 150.0"
+      },
+      "resources": [
+        { "label": "Python — @property", "url": "https://docs.python.org/3/library/functions.html#property" },
+        { "label": "Java — Encapsulation", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/encapsulating.html" }
+      ]
+    },
+    {
+      "id": "abstraction",
+      "title": "Abstraction",
+      "learn": "Abstract classes and methods — defining interfaces without full implementation.",
+      "python": {
+        "definition": "Python has no abstract keyword — use abc.ABC and @abstractmethod to force subclasses to implement methods.",
+        "code": "from abc import ABC, abstractmethod\n\nclass Shape(ABC):\n    @abstractmethod\n    def area(self):\n        pass\n\nclass Circle(Shape):\n    def __init__(self, r): self.r = r\n    def area(self): return 3.14 * self.r ** 2\n\nprint(Circle(2).area())   # 12.56"
+      },
+      "java": {
+        "definition": "abstract class + abstract method — subclasses MUST implement abstract methods. Cannot instantiate the abstract class directly.",
+        "code": "abstract class Shape {\n    abstract double area();\n}\n\nclass Circle extends Shape {\n    double r;\n    Circle(double r) { this.r = r; }\n    @Override double area() { return 3.14 * r * r; }\n}\n\nSystem.out.println(new Circle(2).area()); // 12.56"
+      },
+      "resources": [
+        { "label": "Python — abc module", "url": "https://docs.python.org/3/library/abc.html" },
+        { "label": "Java — Abstract Classes", "url": "https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html" }
+      ]
+    },
+    {
+      "id": "lambda",
+      "title": "Lambda / Anonymous Functions",
+      "learn": "Anonymous functions — small functions defined inline.",
+      "python": {
+        "definition": "lambda args: expression creates a small anonymous function. Limited to a single expression.",
+        "code": "square = lambda x: x * x\nadd = lambda a, b: a + b\n\nprint(square(5))        # 25\nprint(add(3, 4))         # 7\n\nnums = [1, 2, 3, 4]\ndoubled = list(map(lambda x: x * 2, nums))\nprint(doubled)           # [2, 4, 6, 8]"
+      },
+      "java": {
+        "definition": "Lambda expressions (params) -> expression. Java lambdas need a functional interface (SAM).",
+        "code": "import java.util.function.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        IntUnaryOperator square = x -> x * x;\n        BinaryOperator<Integer> add = (a, b) -> a + b;\n        System.out.println(square.applyAsInt(5)); // 25\n        System.out.println(add.apply(3, 4));      // 7\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — Lambda", "url": "https://docs.python.org/3/tutorial/controlflow.html#lambda-expressions" },
+        { "label": "Java — Lambda Expressions", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html" }
+      ]
+    },
+    {
+      "id": "map-filter",
+      "title": "Map & Filter",
+      "learn": "Functional programming — transforming and selecting data.",
+      "python": {
+        "definition": "map(func, iterable) applies func to every item; filter(func, iterable) keeps items where func returns True.",
+        "code": "nums = [1, 2, 3, 4, 5, 6]\n\nsquared = list(map(lambda x: x * x, nums))\nevens = list(filter(lambda x: x % 2 == 0, nums))\n\nprint(squared)   # [1, 4, 9, 16, 25, 36]\nprint(evens)     # [2, 4, 6]"
+      },
+      "java": {
+        "definition": "Stream API: stream().map() and stream().filter() with lambda expressions, collected via Collectors.",
+        "code": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> nums = List.of(1, 2, 3, 4, 5, 6);\n        List<Integer> squared = nums.stream().map(x -> x * x).toList();\n        List<Integer> evens = nums.stream().filter(x -> x % 2 == 0).toList();\n        System.out.println(squared); // [1, 4, 9, 16, 25, 36]\n        System.out.println(evens);   // [2, 4, 6]\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — map/filter", "url": "https://docs.python.org/3/library/functions.html#map" },
+        { "label": "Java — Streams", "url": "https://docs.oracle.com/javase/tutorial/collections/streams/index.html" }
+      ]
+    },
+    {
+      "id": "list-comprehension",
+      "title": "List Comprehension",
+      "learn": "Shorter list operations — create lists in one expression.",
+      "python": {
+        "definition": "[expr for item in iterable if condition] builds a list compactly — combines loop + filter + transform.",
+        "code": "nums = [1, 2, 3, 4, 5, 6]\n\nsquares = [x * x for x in nums]\nevens = [x for x in nums if x % 2 == 0]\nlabels = [f\"num-{x}\" for x in nums[:3]]\n\nprint(squares)  # [1, 4, 9, 16, 25, 36]\nprint(evens)    # [2, 4, 6]\nprint(labels)   # ['num-1', 'num-2', 'num-3']"
+      },
+      "java": {
+        "definition": "No direct equivalent — use Stream API (map/filter/collect) which serves the same purpose.",
+        "code": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        List<Integer> nums = List.of(1, 2, 3, 4, 5, 6);\n        List<Integer> squares = nums.stream().map(x -> x * x).toList();\n        List<Integer> evens = nums.stream().filter(x -> x % 2 == 0).toList();\n        System.out.println(squares);\n        System.out.println(evens);\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — List Comprehensions", "url": "https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions" },
+        { "label": "Java — Streams", "url": "https://docs.oracle.com/javase/tutorial/collections/streams/index.html" }
+      ]
+    },
+    {
+      "id": "decorators",
+      "title": "Decorators",
+      "learn": "Modifying function behaviour without changing the function.",
+      "python": {
+        "definition": "A decorator is a function that takes another function and returns a wrapped version — used with @syntax above the function.",
+        "code": "def timer(func):\n    def wrapper(*args, **kwargs):\n        print(\"Starting...\")\n        result = func(*args, **kwargs)\n        print(\"Finished.\")\n        return result\n    return wrapper\n\n@timer\ndef greet(name):\n    print(f\"Hello {name}\")\n\ngreet(\"Sam\")   # Starting... Hello Sam Finished."
+      },
+      "java": {
+        "definition": "No decorator syntax — achieved via AOP (AspectJ / Spring @Aspect) or wrapper/delegate patterns.",
+        "code": "// Conceptual equivalent using a wrapper\ninterface Task { void run(); }\n\nclass TimedTask implements Task {\n    private final Task inner;\n    TimedTask(Task t) { inner = t; }\n    public void run() {\n        System.out.println(\"Starting...\");\n        inner.run();\n        System.out.println(\"Finished.\");\n    }\n}\n// Spring AOP does this automatically with @Around"
+      },
+      "resources": [
+        { "label": "Python — Decorators", "url": "https://docs.python.org/3/glossary.html#term-decorator" },
+        { "label": "Spring — AOP", "url": "https://docs.spring.io/spring-framework/reference/core/aop.html" }
+      ]
+    },
+    {
+      "id": "generators",
+      "title": "Generators",
+      "learn": "Yield and lazy iteration — produce values one at a time.",
+      "python": {
+        "definition": "A function with yield returns a generator — values are produced lazily on demand, saving memory.",
+        "code": "def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1\n\nfor i in countdown(3):\n    print(i)   # 3 2 1\n\n# Generator expression\nsquares = (x * x for x in range(5))\nprint(list(squares))   # [0, 1, 4, 9, 16]"
+      },
+      "java": {
+        "definition": "No yield — Java uses Iterator/Stream API for lazy evaluation. Iterators produce elements on demand.",
+        "code": "import java.util.*;\nimport java.util.stream.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Lazy stream — values computed on demand\n        IntStream.rangeClosed(1, 3)\n            .map(i -> { System.out.println(\"yield \" + i); return i; })\n            .forEach(System.out::println);\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — Generators", "url": "https://docs.python.org/3/tutorial/classes.html#generators" },
+        { "label": "Java — Stream API", "url": "https://docs.oracle.com/javase/tutorial/collections/streams/index.html" }
+      ]
+    },
+    {
+      "id": "modules",
+      "title": "Modules",
+      "learn": "Import and reusable code.",
+      "python": {
+        "definition": "A module is a .py file; packages are folders with __init__.py. import module / from module import name.",
+        "code": "# mymodule.py\ndef greet(name):\n    return f\"Hello {name}\"\n\n# main.py\nimport mymodule\nfrom mymodule import greet\n\nprint(mymodule.greet(\"Sam\"))\nprint(greet(\"Sam\"))"
+      },
+      "java": {
+        "definition": "Packages organise classes into folders matching the package name. import com.example.Utils; — one public class per file.",
+        "code": "// Utils.java in package com.example\npackage com.example;\npublic class Utils {\n    public static String greet(String name) {\n        return \"Hello \" + name;\n    }\n}\n\n// Main.java\nimport com.example.Utils;\nSystem.out.println(Utils.greet(\"Sam\"));"
+      },
+      "resources": [
+        { "label": "Python — Modules", "url": "https://docs.python.org/3/tutorial/modules.html" },
+        { "label": "Java — Packages", "url": "https://docs.oracle.com/javase/tutorial/java/package/index.html" }
+      ]
+    },
+    {
+      "id": "virtual-env",
+      "title": "Virtual Environments",
+      "learn": "venv and pip — isolated Python environments.",
+      "python": {
+        "definition": "venv creates an isolated folder with its own Python + packages. pip installs packages inside it. Java uses build tools (Maven/Gradle) instead.",
+        "code": "# Create & activate (macOS/Linux)\npython3 -m venv .venv\nsource .venv/bin/activate\n\n# Install packages\npip install requests flask\n\n# Deactivate\ndeactivate\n\n# Java equivalent: Maven downloads deps into ~/.m2\n# mvn dependency:get -Dartifact=requests:requests:2.0"
+      },
+      "java": {
+        "definition": "Java doesn't use virtualenvs — dependencies are managed by Maven (pom.xml) or Gradle (build.gradle), downloaded into a shared local repo (~/.m2).",
+        "code": "<!-- pom.xml dependency example -->\n<dependency>\n  <groupId>org.springframework.boot</groupId>\n  <artifactId>spring-boot-starter-web</artifactId>\n</dependency>\n\n<!-- Then: mvn spring-boot:run -->"
+      },
+      "resources": [
+        { "label": "Python — venv", "url": "https://docs.python.org/3/library/venv.html" },
+        { "label": "Maven — Dependencies", "url": "https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html" }
+      ]
+    },
+    {
+      "id": "json-handling",
+      "title": "JSON — Reading & Writing",
+      "learn": "Working with JSON data.",
+      "python": {
+        "definition": "json module: json.dumps() converts Python objects to JSON string; json.loads() parses JSON to Python objects. dict/list map directly.",
+        "code": "import json\n\ndata = {\"name\": \"Priya\", \"age\": 20, \"marks\": [90, 85]}\n\n# Python -> JSON\njson_str = json.dumps(data, indent=2)\nprint(json_str)\n\n# JSON -> Python\nparsed = json.loads(json_str)\nprint(parsed[\"name\"])   # Priya\n\n# File I/O\nwith open(\"data.json\", \"w\") as f:\n    json.dump(data, f)"
+      },
+      "java": {
+        "definition": "Jackson (or Gson) serialises Java objects to JSON and back. Spring Boot includes Jackson automatically.",
+        "code": "import com.fasterxml.jackson.databind.ObjectMapper;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        ObjectMapper mapper = new ObjectMapper();\n        String json = \"{\\\"name\\\":\\\"Priya\\\",\\\"age\\\":20}\";\n        // JSON -> Map\n        Map<String, Object> data = mapper.readValue(json, Map.class);\n        System.out.println(data.get(\"name\")); // Priya\n        // Object -> JSON\n        System.out.println(mapper.writeValueAsString(data));\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — json module", "url": "https://docs.python.org/3/library/json.html" },
+        { "label": "Jackson — ObjectMapper", "url": "https://github.com/FasterXML/jackson-databind" }
+      ]
+    },
+    {
+      "id": "apis",
+      "title": "APIs — HTTP Requests & Responses",
+      "learn": "Consuming web APIs with HTTP.",
+      "python": {
+        "definition": "requests library: requests.get()/post() return Response objects with .json(), .status_code, .text.",
+        "code": "import requests\n\n# GET\nresp = requests.get(\"https://api.github.com/users/octocat\")\nprint(resp.status_code)          # 200\nprint(resp.json()[\"login\"])      # octocat\n\n# POST with JSON body\nresp = requests.post(\"https://httpbin.org/post\",\n                    json={\"key\": \"value\"})\nprint(resp.json())"
+      },
+      "java": {
+        "definition": "Java 11+ HttpClient, or Spring's RestTemplate/WebClient. Response body parsed via Jackson.",
+        "code": "import java.net.http.*;\nimport java.net.URI;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        HttpClient client = HttpClient.newHttpClient();\n        HttpRequest req = HttpRequest.newBuilder()\n            .uri(URI.create(\"https://api.github.com/users/octocat\"))\n            .GET().build();\n        HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());\n        System.out.println(resp.statusCode());   // 200\n        System.out.println(resp.body());\n    }\n}"
+      },
+      "resources": [
+        { "label": "Python — requests", "url": "https://requests.readthedocs.io/" },
+        { "label": "Java — HttpClient", "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.net.http/java/net/http/HttpClient.html" }
+      ]
+    }
+  ]
+}

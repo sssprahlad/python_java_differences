@@ -1,0 +1,157 @@
+{
+  "section": {
+    "id": "spring-annotations",
+    "title": "Spring Boot — All Annotations",
+    "subtitle": "Every major Spring Boot annotation with examples, plus Django/DRF equivalents."
+  },
+  "leftLabel": "Django / DRF",
+  "rightLabel": "Spring Boot",
+  "leftColor": "#0c4b33",
+  "rightColor": "#6db33f",
+  "topics": [
+    {
+      "id": "core-annotations",
+      "title": "Core Annotations — @SpringBootApplication, @Configuration, @Bean, @Component, @Autowired",
+      "learn": "The foundation annotations every Spring app uses.",
+      "python": {
+        "definition": "Django equivalent: INSTALLED_APPS registers apps; AppConfig.ready() = @PostConstruct; decorators like @login_required = @PreAuthorize. No DI annotations — Django uses explicit imports.",
+        "code": "# settings.py — register apps\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'myapp',\n]\n\n# apps.py — app config (like @Configuration)\nclass MyAppConfig(AppConfig):\n    name = 'myapp'\n    def ready(self): ...   # ~ @PostConstruct\n\n# No @Autowired — import classes directly\nfrom myapp.services import UserService"
+      },
+      "java": {
+        "definition": "@SpringBootApplication = @Configuration + @EnableAutoConfiguration + @ComponentScan (one annotation does it all). @Configuration marks config class; @Bean defines a bean; @Component/@Service/@Repository = stereotype annotations for auto-detection; @Autowired injects dependencies.",
+        "code": "@SpringBootApplication   // = 3 annotations in one\npublic class MyApp {\n    public static void main(String[] a) {\n        SpringApplication.run(MyApp.class, a);\n    }\n}\n\n@Configuration           // config class\npublic class AppConfig {\n    @Bean                 // define a bean\n    public DataSource dataSource() { ... }\n}\n\n@Service                 // business logic bean\npublic class UserService { ... }\n\n@RestController          // web controller bean\npublic class UserController {\n    private final UserService service;\n    public UserController(UserService service) { // ctor injection\n        this.service = service;                  // = @Autowired\n    }\n}"
+      },
+      "resources": [
+        { "label": "Spring — Core annotations", "url": "https://docs.spring.io/spring-framework/reference/core/beans/annotation-config.html" }
+      ]
+    },
+    {
+      "id": "web-annotations",
+      "title": "Web Annotations — @RestController, @RequestMapping, @GetMapping, @PathVariable, @RequestParam, @RequestBody",
+      "learn": "Building REST endpoints.",
+      "python": {
+        "definition": "Django: path() in urls.py maps URLs to views; request.GET/POST access params; JsonResponse/request.data for body. DRF: @api_view, @action decorators.",
+        "code": "# urls.py\npath(\"students/<int:id>/\", views.detail),\npath(\"students/\", views.list),\n\n# views.py — FBV\ndef detail(request, id):\n    # id = path param\n    # request.GET.get('q') = query param\n    # request.data = JSON body\n    return JsonResponse({})\n\n# DRF CBV\nclass StudentViewSet(viewsets.ModelViewSet):\n    queryset = Student.objects.all()\n    serializer_class = StudentSerializer"
+      },
+      "java": {
+        "definition": "@RestController = @Controller + @ResponseBody (auto JSON). @RequestMapping base path; @GetMapping/@PostMapping/@PutMapping/@DeleteMapping/@PatchMapping for verbs. @PathVariable = URL param, @RequestParam = query param, @RequestBody = JSON body.",
+        "code": "@RestController\n@RequestMapping(\"/api/students\")   // base path\npublic class StudentController {\n\n    @GetMapping                      // GET /api/students\n    public List<Student> all() { ... }\n\n    @GetMapping(\"/{id}\")            // GET /api/students/{id}\n    public Student get(@PathVariable Long id) { ... }\n\n    @GetMapping(\"/search\")          // GET /api/students/search?q=x\n    public List<Student> search(@RequestParam String q) { ... }\n\n    @PostMapping                     // POST with JSON body\n    public Student create(@RequestBody StudentDto dto) { ... }\n\n    @PutMapping(\"/{id}\")\n    public Student update(@PathVariable Long id,\n                         @RequestBody StudentDto dto) { ... }\n\n    @DeleteMapping(\"/{id}\")\n    public void delete(@PathVariable Long id) { ... }\n}"
+      },
+      "resources": [
+        { "label": "Spring — Web MVC", "url": "https://docs.spring.io/spring-framework/reference/web/webmvc.html" }
+      ]
+    },
+    {
+      "id": "jpa-annotations",
+      "title": "JPA Annotations — @Entity, @Id, @Table, @Column, Relationships, @Transactional",
+      "learn": "Database mapping annotations.",
+      "python": {
+        "definition": "Django models: class Meta for table name, field classes for columns, ForeignKey/OneToOneField/ManyToManyField for relationships. No annotations — class-based DSL.",
+        "code": "class Student(models.Model):\n    name = models.CharField(max_length=100)   # column\n    age = models.IntegerField()\n\n    class Meta:\n        db_table = 'students'      # = @Table(name=...)\n        ordering = ['name']\n\n# Relationships:\ncourse = models.ForeignKey(Course)     # = @ManyToOne\nprofile = models.OneToOneField(User)       # = @OneToOne\ntags = models.ManyToManyField(Tag)          # = @ManyToMany\n\n# Transactions: @transaction.atomic\nfrom django.db import transaction\nwith transaction.atomic():\n    obj.save()"
+      },
+      "java": {
+        "definition": "@Entity = table, @Table(name) = table name, @Id = primary key, @GeneratedValue = auto ID, @Column = column config. Relationships: @ManyToOne/@OneToMany/@OneToOne/@ManyToMany. @Transactional = transaction boundary.",
+        "code": "@Entity\n@Table(name = \"students\")\npublic class Student {\n    @Id\n    @GeneratedValue(strategy = GenerationType.IDENTITY)\n    private Long id;\n\n    @Column(name = \"full_name\", nullable = false, length = 100)\n    private String name;\n\n    @ManyToOne\n    @JoinColumn(name = \"course_id\")\n    private Course course;\n\n    @OneToMany(mappedBy = \"student\")\n    private List<Enrollment> enrollments;\n\n    @ManyToMany\n    @JoinTable(name = \"student_tags\")\n    private List<Tag> tags;\n}\n\n@Service\npublic class StudentService {\n    @Transactional   // atomic — rollback on exception\n    public void enroll(Long studentId, Long courseId) { ... }\n}"
+      },
+      "resources": [
+        { "label": "JPA annotations", "url": "https://jakarta.ee/specifications/persistence/" }
+      ]
+    },
+    {
+      "id": "validation-annotations",
+      "title": "Validation & Exception Annotations — @Valid, @NotNull, @Min, @ExceptionHandler, @ControllerAdvice",
+      "learn": "Input validation and global error handling.",
+      "python": {
+        "definition": "Django forms validate via field classes (EmailField, MinValueValidator). DRF serializers validate via field types + validators. Custom errors via ValidationError.",
+        "code": "# Django forms\nclass StudentForm(forms.Form):\n    name = forms.CharField(max_length=100)\n    age = forms.IntegerField(min_value=0)\n    email = forms.EmailField()\n\n# DRF serializer validation\nclass StudentSerializer(serializers.Serializer):\n    name = serializers.CharField(max_length=100)\n    age = serializers.IntegerField(min_value=0, max_value=120)\n    email = serializers.EmailField()\n\n# Custom exception handler\n@api_view(['POST'])\ndef create(request):\n    s = StudentSerializer(data=request.data)\n    s.is_valid(raise_exception=True)  # auto 400"
+      },
+      "java": {
+        "definition": "Bean Validation annotations on DTO fields + @Valid on controller params triggers validation. @ControllerAdvice + @ExceptionHandler = global exception handling for all controllers.",
+        "code": "public record StudentDto(\n    @NotBlank(message = \"name required\")\n    @Size(max = 100) String name,\n    @Min(0) @Max(120) int age,\n    @Email String email) {}\n\n@PostMapping\npublic Student create(@Valid @RequestBody StudentDto dto) {\n    return service.save(dto);\n    // @Valid fails -> MethodArgumentNotValidException\n}\n\n@RestControllerAdvice   // global handler for ALL controllers\npublic class GlobalExceptionHandler {\n    @ExceptionHandler(MethodArgumentNotValidException.class)\n    public ResponseEntity<Map<String, String>> handle(\n            MethodArgumentNotValidException ex) {\n        Map<String, String> errors = new HashMap<>();\n        ex.getBindingResult().getFieldErrors()\n          .forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));\n        return ResponseEntity.badRequest().body(errors); // 400\n    }\n}"
+      },
+      "resources": [
+        { "label": "Bean Validation", "url": "https://docs.spring.io/spring-framework/reference/core/validation.html" }
+      ]
+    },
+    {
+      "id": "aop-annotations",
+      "title": "AOP Annotations — @Aspect, @Before, @After, @Around, @Pointcut",
+      "learn": "Aspect-Oriented Programming — cross-cutting concerns (logging, timing, security).",
+      "python": {
+        "definition": "Python equivalent = decorators! Decorators wrap functions to add behaviour (logging, timing, auth) without modifying the function — same concept as AOP.",
+        "code": "import time, functools\n\n# Decorator = Python's AOP\ndef logged(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(f\"Calling {func.__name__}\")\n        result = func(*args, **kwargs)\n        print(f\"Done {func.__name__}\")\n        return result\n    return wrapper\n\n@logged\ndef process_order(order_id):\n    return f\"order-{order_id}\"\n\n# Django middleware = similar concept\n# class LoggingMiddleware: __call__ wraps every request"
+      },
+      "java": {
+        "definition": "@Aspect marks aspect class; @Pointcut defines WHERE to apply; @Before/@After/@AfterReturning/@AfterThrowing/@Around = WHEN relative to method execution. Spring AOP uses proxies.",
+        "code": "@Aspect\n@Component\npublic class LoggingAspect {\n\n    @Pointcut(\"execution(* com.example.service.*.*(..))\")\n    void serviceLayer() {}\n\n    @Before(\"serviceLayer()\")\n    public void logBefore(JoinPoint jp) {\n        System.out.println(\"Before: \" + jp.getSignature().getName());\n    }\n\n    @Around(\"serviceLayer()\")\n    public Object timeMethod(ProceedingJoinPoint pjp) throws Throwable {\n        long start = System.currentTimeMillis();\n        Object result = pjp.proceed();   // call actual method\n        System.out.println(\"Took \" + (System.currentTimeMillis() - start) + \"ms\");\n        return result;\n    }\n\n    @AfterThrowing(pointcut = \"serviceLayer()\", throwing = \"ex\")\n    public void logError(Exception ex) {\n        System.out.println(\"Error: \" + ex.getMessage());\n    }\n}"
+      },
+      "resources": [
+        { "label": "Spring AOP", "url": "https://docs.spring.io/spring-framework/reference/core/aop.html" }
+      ]
+    },
+    {
+      "id": "scheduling-config",
+      "title": "Scheduling & Configuration — @Scheduled, @EnableScheduling, @Profile, @ConfigurationProperties, @Value",
+      "learn": "Background tasks and externalised configuration.",
+      "python": {
+        "definition": "APScheduler or Celery for scheduled tasks. Django settings.py / environment variables for config. python-decouple for .env files.",
+        "code": "# Celery beat for scheduled tasks\nfrom celery import Celery\napp = Celery('tasks')\n\n@app.task\ndef send_email(): ...\n\n# Schedule in celery beat config:\n# 'send-daily': {'task': 'tasks.send_email', 'schedule': crontab(hour=9)}\n\n# Config via environment\nimport os\nDEBUG = os.getenv('DEBUG', 'False') == 'True'\nDATABASE_URL = os.getenv('DATABASE_URL')"
+      },
+      "java": {
+        "definition": "@EnableScheduling + @Scheduled(cron/fixedRate/fixedDelay) for tasks. @Profile activates beans per environment. @ConfigurationProperties binds application.properties/yml to a class. @Value injects single property.",
+        "code": "@SpringBootApplication\n@EnableScheduling   // enable @Scheduled\npublic class MyApp { ... }\n\n@Component\npublic class EmailJob {\n    @Scheduled(cron = \"0 0 9 * * *\")   // daily 9 AM\n    public void sendDailyReport() { ... }\n\n    @Scheduled(fixedRate = 60000)         // every 60s\n    public void heartbeat() { ... }\n}\n\n@Profile(\"production\")   // only active in prod\n@Component\npublic class ProdConfig { ... }\n\n@ConfigurationProperties(prefix = \"app\")\n@Component\npublic class AppProperties {\n    private String name;\n    private int port;\n    // getters/setters\n}\n# application.yml:\n# app:\n#   name: MyApp\n#   port: 8080\n\n@Value(\"${app.name}\")\nprivate String appName;   // single property injection"
+      },
+      "resources": [
+        { "label": "Spring — Scheduling", "url": "https://docs.spring.io/spring-framework/reference/integration/scheduling.html" }
+      ]
+    },
+    {
+      "id": "security-annotations",
+      "title": "Security Annotations — @PreAuthorize, @Secured, @RolesAllowed, @EnableMethodSecurity",
+      "learn": "Method-level authorization.",
+      "python": {
+        "definition": "DRF: permission_classes=[IsAdminUser, IsAuthenticated]. Django: @login_required, @permission_required('app.perm'). Custom: BasePermission subclass.",
+        "code": "from rest_framework import permissions\n\nclass IsOwner(permissions.BasePermission):\n    def has_object_permission(self, request, view, obj):\n        return obj.owner == request.user\n\nclass StudentViewSet(viewsets.ModelViewSet):\n    permission_classes = [IsAuthenticated, IsOwner]\n\n# Django:\nfrom django.contrib.auth.decorators import permission_required\n@permission_required('students.delete_student')\ndef delete_student(request, id): ..."
+      },
+      "java": {
+        "definition": "@EnableMethodSecurity enables annotation-based auth. @PreAuthorize = most powerful (SpEL expressions). @Secured = role check. @RolesAllowed = JSR-250 standard. Combine with Spring Security config.",
+        "code": "@Configuration\n@EnableMethodSecurity   // enable method security\npublic class SecurityConfig { ... }\n\n@RestController\npublic class AdminController {\n    @PreAuthorize(\"hasRole('ADMIN')\")           // role check\n    @DeleteMapping(\"/users/{id}\")\n    public void deleteUser(@PathVariable Long id) { ... }\n\n    @PreAuthorize(\"@studentService.isOwner(#id, authentication)\")  // custom\n    @GetMapping(\"/students/{id}\")\n    public StudentDto get(@PathVariable Long id) { ... }\n\n    @Secured(\"ROLE_ADMIN\")                      // simpler role check\n    @GetMapping(\"/reports\")\n    public Report reports() { ... }\n\n    @RolesAllowed(\"ADMIN\")                      // JSR-250\n    @PostMapping(\"/backup\")\n    public void backup() { ... }\n}"
+      },
+      "resources": [
+        { "label": "Spring Security — Method Security", "url": "https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html" }
+      ]
+    },
+    {
+      "id": "testing-annotations",
+      "title": "Testing Annotations — @SpringBootTest, @WebMvcTest, @DataJpaTest, @MockBean",
+      "learn": "Spring Boot test slices and mocking.",
+      "python": {
+        "definition": "pytest + pytest-django: @pytest.mark.django_db for DB access, @pytest.fixture for setup, unittest.mock.patch for mocking. DRF: APIClient for endpoint tests.",
+        "code": "import pytest\nfrom rest_framework.test import APIClient\n\n@pytest.fixture\ndef client():\n    return APIClient()\n\n@pytest.mark.django_db\ndef test_create_student(client):\n    resp = client.post('/api/students/', {\n        'name': 'Priya', 'age': 20\n    }, format='json')\n    assert resp.status_code == 201\n    assert resp.data['name'] == 'Priya'\n\n# Mock external service\nfrom unittest.mock import patch\n@patch('myapp.services.email.send')\ndef test_send_email(mock_send): ..."
+      },
+      "java": {
+        "definition": "@SpringBootTest = full context integration test. @WebMvcTest = only web layer (controllers). @DataJpaTest = only JPA/repositories. @MockBean/@MockitoBean = mock a bean. @Autowired injects test dependencies.",
+        "code": "@SpringBootTest               // full app context\n@AutoConfigureMockMvc\nclass StudentIntegrationTest {\n    @Autowired MockMvc mvc;\n    @Autowired StudentRepository repo;\n\n    @Test\n    void createStudent() throws Exception {\n        mvc.perform(post(\"/api/students\")\n            .contentType(MediaType.APPLICATION_JSON)\n            .content(\"{\\\"name\\\":\\\"Priya\\\",\\\"age\\\":20}\"))\n            .andExpect(status().isCreated());\n    }\n}\n\n@WebMvcTest(StudentController.class)   // web layer only\nclass StudentControllerTest {\n    @Autowired MockMvc mvc;\n    @MockitoBean StudentService service; // mock service\n}\n\n@DataJpaTest                     // JPA layer only\nclass StudentRepositoryTest {\n    @Autowired StudentRepository repo;\n    @Test void findByName() { ... }\n}"
+      },
+      "resources": [
+        { "label": "Spring Boot Testing", "url": "https://docs.spring.io/spring-boot/reference/testing/" }
+      ]
+    },
+    {
+      "id": "misc-annotations",
+      "title": "Misc Useful Annotations — @Order, @Conditional, @Lazy, @Primary, @Qualifier, @PostConstruct, @PreDestroy",
+      "learn": "Smaller but important annotations.",
+      "python": {
+        "definition": "Django/Python equivalents: ordering via list position, lazy via import inside function, conditional via settings flag, primary via direct import.",
+        "code": "# Lazy import — load only when needed\ndef get_service():\n    from heavy_module import HeavyService\n    return HeavyService()\n\n# Conditional — check setting\nif settings.USE_CACHE:\n    cache = RedisCache()\n\n# Order — list position defines priority\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',  # first\n    'django.contrib.sessions.middleware.SessionMiddleware',\n]\n\n# Cleanup — context manager / __del__\nclass Resource:\n    def __del__(self): print(\"cleanup\")"
+      },
+      "java": {
+        "definition": "@Order sets bean/method priority. @Conditional creates bean only if condition met. @Lazy delays bean creation. @Primary marks preferred bean when multiple exist. @Qualifier selects specific bean. @PostConstruct/@PreDestroy = init/destroy callbacks.",
+        "code": "// Multiple beans of same type — @Primary wins\n@Primary\n@Component\npublic class PrimaryEmailService implements EmailService { ... }\n\n// Select specific bean with @Qualifier\n@Autowired\npublic void setService(@Qualifier(\"smsService\") NotificationService svc) { ... }\n\n// Lazy — create only when first needed\n@Lazy\n@Component\npublic class HeavyService { ... }\n\n// Conditional — bean only if property set\n@ConditionalOnProperty(name = \"app.cache.enabled\", havingValue = \"true\")\n@Component\npublic class CacheConfig { ... }\n\n// Init/destroy callbacks\n@PostConstruct\npublic void init() { ... }\n@PreDestroy\npublic void cleanup() { ... }"
+      },
+      "resources": [
+        { "label": "Spring — Bean annotations", "url": "https://docs.spring.io/spring-framework/reference/core/beans/annotation-config.html" }
+      ]
+    }
+  ]
+}
