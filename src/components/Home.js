@@ -1,18 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelectedSection }) {
 
 
-  if(selectedSection !== null){
-      sections?.map((section) => {
-        if(section.id === selectedSection) {
-          setSelectedSection(section);
-        }
-      });
+  // if(selectedSection !== null){
+  //     sections?.map((section) => {
+  //       if(section.id === selectedSection) {
+  //         setSelectedSection(section);
+  //       }
+  //     });
   
+  // }
 
-    
+  useEffect(() => {
+  if (selectedSection !== null) {
+    const selected = sections?.find(
+      (section) => section.id === selectedSection
+    );
+
+    setSelectedSection(selected || null);
   }
+}, [selectedSection, sections]);
+
+
   return (
     <div className="home-view">
       <div className="home-hero">
@@ -42,7 +52,7 @@ function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelected
                 ))}
                 {topics.length > 8 && <span className="topic-chip more">+{topics.length - 8} more</span>}
               </div>
-              <button className="section-open" onClick={() => { onOpenSection(section.id) }}>
+              <button className="section-open" onClick={() => { onOpenSection(section.id); setSelectedSection(section) }}>
                 Browse all topics →
               </button>
             </div>
