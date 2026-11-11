@@ -1,27 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelectedSection }) {
-
-
-  // if(selectedSection !== null){
-  //     sections?.map((section) => {
-  //       if(section.id === selectedSection) {
-  //         setSelectedSection(section);
-  //       }
-  //     });
-  
-  // }
-
-  useEffect(() => {
-  if (selectedSection !== null) {
-    const selected = sections?.find(
-      (section) => section.id === selectedSection
-    );
-
-    setSelectedSection(selected || null);
-  }
-}, [selectedSection, sections]);
-
 
   return (
     <div className="home-view">
