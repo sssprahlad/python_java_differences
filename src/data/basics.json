@@ -133,11 +133,11 @@
       "title": "Lists, Tuples, Sets",
       "learn": "Collections — ordered and unordered groups of items.",
       "python": {
-        "definition": "list = ordered, mutable, allows duplicates [ ]. tuple = ordered, immutable ( ). set = unordered, unique items { }. All support len() and iteration.",
+        "definition": "list = ordered, mutable, allows duplicates [ ]. \\n tuple = ordered, immutable ( ). \\n set = unordered, unique items { }. All support len() and iteration.",
         "code": "my_list = [1, 2, 3]\nmy_tuple = (1, 2, 3)\nmy_set = {1, 2, 3, 3}   # duplicates removed\n\nmy_list.append(4)          # [1, 2, 3, 4]\nmy_list[0] = 10             # [10, 2, 3, 4]\nprint(len(my_list), my_set) # 4 {1, 2, 3}"
       },
       "java": {
-        "definition": "ArrayList = ordered, resizable list. Arrays are fixed-size. HashSet = unordered unique items. Tuples don't exist; use arrays or List.of().",
+        "definition": "ArrayList = ordered, resizable list. Arrays are fixed-size. \\n HashSet = unordered unique items. Tuples don't exist; use arrays or List.of().",
         "code": "import java.util.*;\n\nList<Integer> myList = new ArrayList<>(List.of(1, 2, 3));\nSet<Integer> mySet = new HashSet<>(List.of(1, 2, 3, 3));\n\nmyList.add(4);             // [1, 2, 3, 4]\nmyList.set(0, 10);          // [10, 2, 3, 4]\nSystem.out.println(myList.size() + \" \" + mySet); // 4 [1, 2, 3]"
       },
       "resources": [

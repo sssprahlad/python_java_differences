@@ -1,6 +1,18 @@
 import React from 'react';
 
-function Home({ sections, onOpenSection, onOpenTopic }) {
+function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelectedSection }) {
+
+
+  if(selectedSection !== null){
+      sections?.map((section) => {
+        if(section.id === selectedSection) {
+          setSelectedSection(section);
+        }
+      });
+  
+
+    
+  }
   return (
     <div className="home-view">
       <div className="home-hero">
@@ -24,13 +36,13 @@ function Home({ sections, onOpenSection, onOpenTopic }) {
               <span className="topic-total">{topics.length} topics</span>
               <div className="topic-chips">
                 {topics.slice(0, 8).map((t) => (
-                  <button key={t.id} className="topic-chip" onClick={() => onOpenTopic(section.id, t.id)}>
+                  <button key={t.id} className="topic-chip" onClick={() => { setSelectedSection(section); onOpenTopic(section.id, t.id) }}>
                     {t.title}
                   </button>
                 ))}
                 {topics.length > 8 && <span className="topic-chip more">+{topics.length - 8} more</span>}
               </div>
-              <button className="section-open" onClick={() => onOpenSection(section.id)}>
+              <button className="section-open" onClick={() => { onOpenSection(section.id) }}>
                 Browse all topics →
               </button>
             </div>

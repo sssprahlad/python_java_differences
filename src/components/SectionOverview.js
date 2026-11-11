@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SectionOverview({ section, onOpenTopic, onBack }) {
+function SectionOverview({ section, onOpenTopic, onBack, }) {
   return (
     <div className="home-view">
       <button className="back-btn" onClick={onBack}>← All sections</button>

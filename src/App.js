@@ -23,6 +23,7 @@ function App() {
   const [activeSectionId, setActiveSectionId] = useState(null);
   const [activeTopicId, setActiveTopicId] = useState(null);
   const [playground, setPlayground] = useState(null); // { section, code, lang }
+  const [selectedSection, setSelectedSection] = useState(null);
 
   const activeSection = useMemo(
     () => SECTIONS.find((s) => s.section.id === activeSectionId) || null,
@@ -80,15 +81,21 @@ function App() {
               leftColor={activeSection.leftColor}
               rightColor={activeSection.rightColor}
               onRunInPlayground={openPlayground}
+              section={activeSection}
+              onOpenTopic={openTopic}
+              onBack={() => setActiveTopicId(null)}
+              selectedSection={selectedSection}                   
+             
             />
           ) : activeSection ? (
             <SectionOverview
               section={activeSection}
               onOpenTopic={openTopic}
+              selectedSection={selectedSection}
               onBack={() => { setActiveSectionId(null); setActiveTopicId(null); }}
             />
           ) : (
-            <Home sections={SECTIONS} onOpenSection={openSection} onOpenTopic={openTopic} />
+            <Home sections={SECTIONS} onOpenSection={openSection} onOpenTopic={openTopic} selectedSection={selectedSection} setSelectedSection={setSelectedSection} />
           )}
         </main>
       </div>
