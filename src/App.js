@@ -21,6 +21,7 @@ import cssTailwindData from './data/css-tailwind.json';
 import keyValueData from './data/keyvalue.json';
 import sqliteMongooseData from './data/sqlite-mongoose.json';
 import pythonFrameworksData from './data/python-frameworks.json';
+import gitCommandsData from './data/git-commands.json';
 
 // Normalize every section to expose a `columns` array:
 // [{ key, label, color }] — legacy files derive it from leftLabel/rightLabel
@@ -37,7 +38,7 @@ const SECTIONS = [
   basicsData, advancedData, databaseData, djangoSpringData,
   javaCoreA, javaCoreB, springAnnotations,
   nodeJsData, backend3Data, frontendData, cssTailwindData, keyValueData, sqliteMongooseData,
-  pythonFrameworksData,
+  pythonFrameworksData, gitCommandsData,
 ].map(normalizeSection);
 
 function App() {

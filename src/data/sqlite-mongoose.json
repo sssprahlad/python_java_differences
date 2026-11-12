@@ -133,6 +133,109 @@
       ]
     },
     {
+      "id": "sql-crud-where",
+      "title": "SQL CRUD & the WHERE Clause",
+      "learn": "INSERT, SELECT, UPDATE, DELETE and filtering rows with WHERE.",
+      "sqlite": {
+        "definition": "SQL CRUD maps to four statements. WHERE filters rows before the operation — always parameterise values (?) to avoid SQL injection.",
+        "code": "# INSERT\nc.execute('INSERT INTO users (name, age) VALUES (?, ?)', ('Alice', 30))\n\n# SELECT with WHERE\nc.execute('SELECT * FROM users WHERE age >= ? AND city = ?', (18, 'Paris'))\n\n# UPDATE with WHERE\nc.execute('UPDATE users SET age = ? WHERE id = ?', (31, 1))\n\n# DELETE with WHERE\nc.execute('DELETE FROM users WHERE id = ?', (1,))"
+      },
+      "mongoose": {
+        "definition": "CRUD maps to create/save, find, updateOne/updateMany, deleteOne/deleteMany. Filters are objects — field conditions replace WHERE clauses.",
+        "code": "// INSERT\nawait User.create({ name: 'Alice', age: 30 });\n\n// SELECT with filter (WHERE equivalent)\nawait User.find({ age: { $gte: 18 }, city: 'Paris' });\n\n// UPDATE with filter\nawait User.updateOne({ _id: 1 }, { $set: { age: 31 } });\n\n// DELETE with filter\nawait User.deleteOne({ _id: 1 });"
+      },
+      "resources": [
+        { "label": "SQLite — INSERT/SELECT/UPDATE/DELETE", "url": "https://www.sqlite.org/lang.html" },
+        { "label": "Mongoose — CRUD", "url": "https://mongoosejs.com/docs/queries.html" }
+      ]
+    },
+    {
+      "id": "order-group-having",
+      "title": "ORDER BY, GROUP BY, Aggregates & HAVING",
+      "learn": "Sorting, grouping rows and computing totals.",
+      "sqlite": {
+        "definition": "ORDER BY sorts rows (ASC/DESC); GROUP BY collapses rows per key; aggregates COUNT/SUM/AVG/MIN/MAX compute per group; HAVING filters groups (WHERE can't see aggregates).",
+        "code": "# sort\nSELECT name, age FROM users ORDER BY age DESC LIMIT 5;\n\n# group + aggregate\nSELECT city, COUNT(*) AS n, AVG(age) AS avg_age\nFROM users\nGROUP BY city\nHAVING COUNT(*) > 10;\n\n# aggregates without GROUP BY\nSELECT COUNT(*), SUM(age) FROM users;"
+      },
+      "mongoose": {
+        "definition": "Sorting via .sort(), limits via .limit(). Grouping/aggregation uses the pipeline: $match (filter) → $group (aggregate) → $sort/$limit — the GROUP BY/HAVING equivalent.",
+        "code": "// ORDER BY + LIMIT\nawait User.find().sort({ age: -1 }).limit(5);\n\n// GROUP BY + HAVING via aggregation\nawait User.aggregate([\n  { $group: { _id: '$city', n: { $sum: 1 }, avgAge: { $avg: '$age' } } },\n  { $match: { n: { $gt: 10 } } },   // HAVING\n  { $sort: { n: -1 } }\n]);"
+      },
+      "resources": [
+        { "label": "SQLite — SELECT (ORDER/GROUP/HAVING)", "url": "https://www.sqlite.org/lang_select.html" },
+        { "label": "MongoDB — Aggregation pipeline", "url": "https://www.mongodb.com/docs/manual/core/aggregation-pipeline/" }
+      ]
+    },
+    {
+      "id": "keys-joins",
+      "title": "Primary Keys, Foreign Keys & Joins",
+      "learn": "Identifying rows and combining tables.",
+      "sqlite": {
+        "definition": "PRIMARY KEY uniquely identifies each row; FOREIGN KEY links a row to another table's PK enforcing referential integrity. JOINs merge related rows at query time.",
+        "code": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);\nCREATE TABLE orders (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER NOT NULL REFERENCES users(id), -- FK\n  total REAL\n);\n\n-- joins\nSELECT u.name, o.total FROM users u\nINNER JOIN orders o ON o.user_id = u.id;\n\nSELECT u.name, o.total FROM users u\nLEFT JOIN orders o ON o.user_id = u.id; -- keep users w/o orders"
+      },
+      "mongoose": {
+        "definition": "MongoDB has _id (auto PK-like). Relationships use referencing (store ObjectId + ref, join via populate()/$lookup) or embedding (sub-documents). No enforced FK constraints.",
+        "code": "// _id acts as the primary key\nconst orderSchema = new Schema({\n  user: { type: ObjectId, ref: 'User' }, // FK-like ref\n  total: Number\n});\n\n// populate() = JOIN\nawait Order.find().populate('user');\n\n// or embed — no join needed:\n// user.orders: [{ total: 49.99 }]"
+      },
+      "resources": [
+        { "label": "SQLite — Foreign key support", "url": "https://www.sqlite.org/foreignkeys.html" },
+        { "label": "MongoDB — Relationships", "url": "https://www.mongodb.com/docs/manual/core/data-model-design/" }
+      ]
+    },
+    {
+      "id": "constraints-indexes",
+      "title": "Constraints & Indexes",
+      "learn": "Rules on data and fast lookups.",
+      "sqlite": {
+        "definition": "Constraints enforce data rules: NOT NULL, UNIQUE, CHECK, DEFAULT, FOREIGN KEY. Indexes (CREATE INDEX) speed up WHERE/JOIN at the cost of write speed and storage.",
+        "code": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL UNIQUE,        -- constraint\n  age INTEGER CHECK (age >= 0),       -- constraint\n  role TEXT DEFAULT 'user'\n);\n\nCREATE INDEX idx_users_age ON users(age);\nCREATE UNIQUE INDEX idx_email ON users(email);\n\n-- EXPLAIN QUERY PLAN shows index usage"
+      },
+      "mongoose": {
+        "definition": "Schema options enforce rules: required, unique, min/max, enum, match (regex), custom validators. Indexes via schema.index() or Model.createIndex() — unique/sparse/TTL/compound.",
+        "code": "const userSchema = new Schema({\n  email: { type: String, required: true, unique: true, match: /@/ },\n  age: { type: Number, min: 0 },\n  role: { type: String, enum: ['user','admin'], default: 'user' }\n});\n\nuserSchema.index({ email: 1 }, { unique: true });\nuserSchema.index({ createdAt: 1 }, { expireAfterSeconds: 3600 }); // TTL"
+      },
+      "resources": [
+        { "label": "SQLite — CREATE INDEX", "url": "https://www.sqlite.org/lang_createindex.html" },
+        { "label": "Mongoose — Indexes", "url": "https://mongoosejs.com/docs/guide.html#indexes" }
+      ]
+    },
+    {
+      "id": "transactions",
+      "title": "Transactions (ACID)",
+      "learn": "All-or-nothing multi-step writes.",
+      "sqlite": {
+        "definition": "A transaction groups statements so they all succeed or all roll back — critical for transfers (debit+credit). sqlite3 uses isolation_level; commit() persists, rollback() undoes.",
+        "code": "conn.isolation_level = None  # manual control\ntry:\n    conn.execute('BEGIN')\n    conn.execute('UPDATE accounts SET balance = balance - 100 WHERE id = 1')\n    conn.execute('UPDATE accounts SET balance = balance + 100 WHERE id = 2')\n    conn.execute('COMMIT')          # both succeed\nexcept Exception:\n    conn.execute('ROLLBACK')        # both undone\n    raise"
+      },
+      "mongoose": {
+        "definition": "MongoDB supports multi-document transactions via sessions — startSession(), withTransaction() auto-commits/rolls back. Requires a replica set (Atlas or local rs0).",
+        "code": "const session = await mongoose.startSession();\nsession.startTransaction();\ntry {\n  await Account.updateOne({ _id: 1 }, { $inc: { balance: -100 } }, { session });\n  await Account.updateOne({ _id: 2 }, { $inc: { balance: 100 } }, { session });\n  await session.commitTransaction();\n} catch (e) {\n  await session.abortTransaction();\n  throw e;\n} finally {\n  session.endSession();\n}"
+      },
+      "resources": [
+        { "label": "SQLite — Transactions", "url": "https://www.sqlite.org/lang_transaction.html" },
+        { "label": "MongoDB — Transactions", "url": "https://www.mongodb.com/docs/manual/core/transactions/" }
+      ]
+    },
+    {
+      "id": "python-postgres",
+      "title": "Python → PostgreSQL Connection",
+      "learn": "Connecting Python to a real Postgres server with psycopg.",
+      "sqlite": {
+        "definition": "PostgreSQL is a full client-server DB (unlike file-based SQLite). Python connects via psycopg (v3) or psycopg2 — server runs separately; %s placeholders replace ?. Same SQL mostly.",
+        "code": "import psycopg\n\nconn = psycopg.connect(\n    'postgresql://user:pass@localhost:5432/mydb'\n)\nwith conn.cursor() as cur:\n    cur.execute('SELECT * FROM users WHERE age > %s', (18,))\n    rows = cur.fetchall()\nconn.commit()\nconn.close()\n\n# SQLAlchemy/ORMs also target Postgres the same way"
+      },
+      "mongoose": {
+        "definition": "Mongoose connects to MongoDB — locally or MongoDB Atlas (cloud). The connection string holds host, credentials, db name and options; mongoose handles pooling automatically.",
+        "code": "const mongoose = require('mongoose');\n\n// Atlas cloud or local replica set\nawait mongoose.connect(\n  'mongodb+srv://user:pass@cluster0.xxxx.mongodb.net/mydb?retryWrites=true&w=majority'\n);\n\n// pooling is automatic — reuse the connection\n// transactions need replica set (Atlas provides it)"
+      },
+      "resources": [
+        { "label": "psycopg docs", "url": "https://www.psycopg.org/psycopg3/docs/" },
+        { "label": "PostgreSQL docs", "url": "https://www.postgresql.org/docs/" },
+        { "label": "Mongoose — Connect", "url": "https://mongoosejs.com/docs/connections.html" }
+      ]
+    },
+    {
       "id": "when-to-choose",
       "title": "When to Choose Which",
       "learn": "SQLite+SQL vs MongoDB+Mongoose trade-offs.",

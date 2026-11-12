@@ -1,0 +1,267 @@
+{
+  "section": {
+    "id": "git-commands",
+    "title": "Git Commands — Complete Cheat Sheet",
+    "subtitle": "Every essential Git command explained: setup, staging, committing, branching, merging, remotes and history.",
+    "color": "#f05032"
+  },
+  "columns": [
+    { "key": "git", "label": "Git", "color": "#f05032" }
+  ],
+  "topics": [
+    {
+      "id": "git-init",
+      "title": "git init — Start a Repository",
+      "learn": "Turn a folder into a Git repository.",
+      "git": {
+        "definition": "git init creates a new empty Git repository in the current directory by adding a hidden .git folder that tracks all changes.",
+        "code": "git init\n# or with a custom branch name\ngit init -b main"
+      },
+      "resources": [
+        { "label": "Git — git init", "url": "https://git-scm.com/docs/git-init" }
+      ]
+    },
+    {
+      "id": "git-clone",
+      "title": "git clone — Copy a Repository",
+      "learn": "Download an existing repo from a remote.",
+      "git": {
+        "definition": "git clone downloads a full copy of a remote repository — all files, history and branches — onto your machine.",
+        "code": "git clone https://github.com/user/repo.git\n# shallow clone (faster, no history)\ngit clone --depth 1 https://github.com/user/repo.git"
+      },
+      "resources": [
+        { "label": "Git — git clone", "url": "https://git-scm.com/docs/git-clone" }
+      ]
+    },
+    {
+      "id": "git-status",
+      "title": "git status — See What Changed",
+      "learn": "Check the working tree state.",
+      "git": {
+        "definition": "git status shows which files are modified, staged, or untracked — run it constantly to know where you are.",
+        "code": "git status\ngit status -s    # short format (script-friendly)\ngit status -b    # include branch info"
+      },
+      "resources": [
+        { "label": "Git — git status", "url": "https://git-scm.com/docs/git-status" }
+      ]
+    },
+    {
+      "id": "git-add",
+      "title": "git add — Stage Changes",
+      "learn": "Move changes into the staging area.",
+      "git": {
+        "definition": "git add copies modified/new files into the staging area (index) — the snapshot that the next commit will record. Nothing is saved to history until you commit.",
+        "code": "git add file.js            # one file\ngit add .                  # everything\ngit add -p                 # interactively pick hunks\ngit add -A                 # all changes incl. deletions"
+      },
+      "resources": [
+        { "label": "Git — git add", "url": "https://git-scm.com/docs/git-add" }
+      ]
+    },
+    {
+      "id": "git-commit",
+      "title": "git commit — Save a Snapshot",
+      "learn": "Record staged changes in history.",
+      "git": {
+        "definition": "git commit permanently stores the staged snapshot in local history with a message. Use -m for inline messages, --amend to fix the last commit.",
+        "code": "git commit -m \"Add login feature\"\ngit commit -am \"Fix typo\"      # add+commit tracked files\ngit commit --amend -m \"Better message\"  # fix last commit"
+      },
+      "resources": [
+        { "label": "Git — git commit", "url": "https://git-scm.com/docs/git-commit" }
+      ]
+    },
+    {
+      "id": "git-push-pull",
+      "title": "git push & git pull — Sync with Remote",
+      "learn": "Upload commits and download others' work.",
+      "git": {
+        "definition": "git push uploads your local commits to the remote (GitHub etc.). git pull fetches remote changes and merges them into your current branch.",
+        "code": "git push origin main           # push to remote branch\ngit push -u origin feature     # push + set upstream\n\ngit pull origin main           # fetch + merge\ngit pull --rebase              # fetch + rebase (cleaner history)"
+      },
+      "resources": [
+        { "label": "Git — git push", "url": "https://git-scm.com/docs/git-push" },
+        { "label": "Git — git pull", "url": "https://git-scm.com/docs/git-pull" }
+      ]
+    },
+    {
+      "id": "git-fetch",
+      "title": "git fetch — Download Without Merging",
+      "learn": "Get remote updates safely.",
+      "git": {
+        "definition": "git fetch downloads remote branches and commits into remote-tracking refs (origin/main) WITHOUT touching your working files — inspect first, merge later.",
+        "code": "git fetch origin\ngit fetch --all              # all remotes\n\n# then see what's new:\ngit log HEAD..origin/main --oneline\n# merge when ready: git merge origin/main"
+      },
+      "resources": [
+        { "label": "Git — git fetch", "url": "https://git-scm.com/docs/git-fetch" }
+      ]
+    },
+    {
+      "id": "git-branch",
+      "title": "git branch — Manage Branches",
+      "learn": "List, create and delete branches.",
+      "git": {
+        "definition": "Branches are independent lines of development. git branch lists/creates/deletes them; -d deletes only merged branches (safe), -D forces.",
+        "code": "git branch                    # list local branches\ngit branch feature-login       # create (stays on current)\ngit branch -d feature-login    # delete (if merged)\ngit branch -m old new          # rename\ngit branch -a                 # list local + remote"
+      },
+      "resources": [
+        { "label": "Git — git branch", "url": "https://git-scm.com/docs/git-branch" }
+      ]
+    },
+    {
+      "id": "git-switch-checkout",
+      "title": "git switch & git checkout — Change Branches",
+      "learn": "Move between branches or restore files.",
+      "git": {
+        "definition": "git switch (modern) moves you to another branch, creating it with -c if needed. git checkout is the older all-in-one command — also restores files with -- .",
+        "code": "git switch main\ngit switch -c feature        # create + switch\ngit switch -                    # back to previous branch\n\ngit checkout main              # older equivalent\ngit checkout -- file.js        # discard local changes"
+      },
+      "resources": [
+        { "label": "Git — git switch", "url": "https://git-scm.com/docs/git-switch" },
+        { "label": "Git — git checkout", "url": "https://git-scm.com/docs/git-checkout" }
+      ]
+    },
+    {
+      "id": "git-merge",
+      "title": "git merge — Combine Branches",
+      "learn": "Merge one branch into another.",
+      "git": {
+        "definition": "git merge combines the history of another branch into your current one, creating a merge commit (or fast-forwarding if possible). Conflicts must be resolved manually.",
+        "code": "git switch main\ngit merge feature-login       # merge feature into main\n\n# if conflicts:\n#   fix files, then\ngit add . && git commit        # complete the merge\n\ngit merge --abort              # cancel conflicted merge"
+      },
+      "resources": [
+        { "label": "Git — git merge", "url": "https://git-scm.com/docs/git-merge" }
+      ]
+    },
+    {
+      "id": "git-rebase",
+      "title": "git rebase — Replay Commits",
+      "learn": "Move/replay commits onto another base.",
+      "git": {
+        "definition": "git rebase takes your commits and replays them on top of another branch — linear, clean history vs merge commits. Never rebase shared/public branches.",
+        "code": "git switch feature\ngit rebase main               # replay feature commits on main\n\n# interactive cleanup:\ngit rebase -i HEAD~3          # squash/fixup/reorder\n\n# pull with rebase:\ngit pull --rebase"
+      },
+      "resources": [
+        { "label": "Git — git rebase", "url": "https://git-scm.com/docs/git-rebase" }
+      ]
+    },
+    {
+      "id": "git-log",
+      "title": "git log — Inspect History",
+      "learn": "Browse commits and find changes.",
+      "git": {
+        "definition": "git log lists commits newest-first. Powerful filters: --oneline, --graph, --author, --since, -p (patches), and searching commit messages.",
+        "code": "git log --oneline --graph --all\ngit log --author=\"prahlad\" --since=\"2 weeks ago\"\ngit log -p file.js             # show changes to a file\ngit log --grep=\"fix\"         # search messages\ngit log -S \"functionName\"     # when code was added/removed"
+      },
+      "resources": [
+        { "label": "Git — git log", "url": "https://git-scm.com/docs/git-log" }
+      ]
+    },
+    {
+      "id": "git-diff",
+      "title": "git diff — See Changes",
+      "learn": "Compare working tree, staging or commits.",
+      "git": {
+        "definition": "git diff shows line-by-line differences: unstaged changes (default), staged (--cached), between commits, or between branches.",
+        "code": "git diff                    # unstaged changes\ngit diff --staged            # what's about to be committed\ngit diff HEAD~1              # last commit's changes\ngit diff main..feature       # branch comparison\ngit diff --stat              # summary only"
+      },
+      "resources": [
+        { "label": "Git — git diff", "url": "https://git-scm.com/docs/git-diff" }
+      ]
+    },
+    {
+      "id": "git-stash",
+      "title": "git stash — Shelve Work Temporarily",
+      "learn": "Pause uncommitted changes safely.",
+      "git": {
+        "definition": "git stash saves uncommitted changes (tracked + optionally untracked) and reverts the working tree — useful for switching tasks without committing.",
+        "code": "git stash                   # stash tracked changes\ngit stash -u                # include untracked files\ngit stash list              # list stashes\ngit stash pop               # apply latest & remove\ngit stash apply stash@{1}   # apply specific stash\n\ngit stash drop              # delete a stash"
+      },
+      "resources": [
+        { "label": "Git — git stash", "url": "https://git-scm.com/docs/git-stash" }
+      ]
+    },
+    {
+      "id": "git-remote",
+      "title": "git remote — Manage Remotes",
+      "learn": "Connect to GitHub/GitLab repositories.",
+      "git": {
+        "definition": "git remote links your repo to hosted copies (origin is the default name). Add, rename, inspect and remove remote URLs.",
+        "code": "git remote -v                # list remotes\ngit remote add origin https://github.com/user/repo.git\ngit remote set-url origin git@github.com:user/repo.git  # switch to SSH\ngit remote rename origin upstream\ngit remote remove upstream"
+      },
+      "resources": [
+        { "label": "Git — git remote", "url": "https://git-scm.com/docs/git-remote" }
+      ]
+    },
+    {
+      "id": "git-tag",
+      "title": "git tag — Mark Releases",
+      "learn": "Label specific commits (v1.0, releases).",
+      "git": {
+        "definition": "Tags are immutable pointers to commits — used for version releases. Lightweight tags are just labels; annotated tags (-a) store author/date/message.",
+        "code": "git tag v1.0.0                       # lightweight\ngit tag -a v1.0.0 -m \"Release 1.0\"        # annotated\ngit tag -l \"v1.*\"                     # list matching\ngit push origin v1.0.0                  # push a tag\ngit push origin --tags                  # push all tags"
+      },
+      "resources": [
+        { "label": "Git — git tag", "url": "https://git-scm.com/docs/git-tag" }
+      ]
+    },
+    {
+      "id": "git-reset",
+      "title": "git reset — Move HEAD Back",
+      "learn": "Undo commits or unstage changes.",
+      "git": {
+        "definition": "git reset moves HEAD (and optionally working tree) to another commit. --soft keeps changes staged, --mixed unstages (default), --hard discards everything — destructive!",
+        "code": "git reset HEAD~1              # undo commit, keep changes staged\ngit reset --soft HEAD~1         # undo commit, keep staged\ngit reset HEAD~1               # undo commit, keep unstaged\ngit reset --hard HEAD~1        # ⚠️ discard commit AND changes\n\ngit reset file.js              # unstage a file (same as restore --staged)"
+      },
+      "resources": [
+        { "label": "Git — git reset", "url": "https://git-scm.com/docs/git-reset" }
+      ]
+    },
+    {
+      "id": "git-revert",
+      "title": "git revert — Undo Safely",
+      "learn": "Create a new commit that undoes another.",
+      "git": {
+        "definition": "git revert creates a NEW commit that reverses a previous commit's changes — safe for shared/public history (unlike reset which rewrites it).",
+        "code": "git revert abc1234              # undo that commit\ngit revert HEAD~2..HEAD         # revert a range\ngit revert --no-commit abc1234  # stage without committing\n\n# prefer revert for pushed commits;\n# reset only for local-only history."
+      },
+      "resources": [
+        { "label": "Git — git revert", "url": "https://git-scm.com/docs/git-revert" }
+      ]
+    },
+    {
+      "id": "git-rm",
+      "title": "git rm — Remove Files",
+      "learn": "Delete files from repo and disk.",
+      "git": {
+        "definition": "git rm deletes a file from both the working tree AND the index (stages the deletion). --cached removes only from tracking, keeping the local file.",
+        "code": "git rm old-file.js             # delete + stage\ngit rm --cached secret.env      # stop tracking, keep file\ngit rm -r folder/               # remove a directory\ngit rm --cached -r .            # untrack everything (then add .gitignore)"
+      },
+      "resources": [
+        { "label": "Git — git rm", "url": "https://git-scm.com/docs/git-rm" }
+      ]
+    },
+    {
+      "id": "git-gitignore",
+      "title": ".gitignore — Exclude Files",
+      "learn": "Tell Git which files to never track.",
+      "git": {
+        "definition": "A .gitignore file lists patterns Git should ignore — node_modules, .env secrets, build output. Already-tracked files must be git rm --cached first.",
+        "code": "# .gitignore\nnode_modules/\n.env\n*.log\ndist/\n.DS_Store\n__pycache__/\n\n# stop tracking an ignored file:\ngit rm --cached .env\ngit commit -m \"Stop tracking .env\""
+      },
+      "resources": [
+        { "label": "Git — gitignore docs", "url": "https://git-scm.com/docs/gitignore" }
+      ]
+    },
+    {
+      "id": "git-config",
+      "title": "git config — Set Identity & Options",
+      "learn": "Configure name, email and behaviour.",
+      "git": {
+        "definition": "git config stores settings at three levels: system (all users), global (~/.gitconfig, your user) and local (this repo's .git/config). Identity is required to commit.",
+        "code": "git config --global user.name \"Sai Prahlad\"\ngit config --global user.email \"you@example.com\n\ngit config --global init.defaultBranch main\ngit config --global core.editor \"code --wait\"\n\n# per-repo override:\ngit config user.name \"Work Name\"\n\ngit config --list   # show all settings"
+      },
+      "resources": [
+        { "label": "Git — git config", "url": "https://git-scm.com/docs/git-config" }
+      ]
+    }
+  ]
+}
