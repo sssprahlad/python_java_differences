@@ -1,0 +1,154 @@
+{
+  "section": {
+    "id": "sqlite-mongoose",
+    "title": "SQLite3 vs Mongoose — Data Access Compared",
+    "subtitle": "Raw SQL through Python's sqlite3 vs MongoDB access through the Mongoose ODM.",
+    "color": "#0f766e"
+  },
+  "columns": [
+    { "key": "sqlite", "label": "SQLite3 (SQL)", "color": "#0f766e" },
+    { "key": "mongoose", "label": "Mongoose (MongoDB)", "color": "#47a248" }
+  ],
+  "topics": [
+    {
+      "id": "overview",
+      "title": "What Each One Is",
+      "learn": "A SQL database driver vs a MongoDB ODM.",
+      "sqlite": {
+        "definition": "sqlite3 is Python's built-in driver for SQLite — a serverless, file-based relational database. You write SQL strings; tables have fixed schemas and relationships via keys.",
+        "code": "import sqlite3\nconn = sqlite3.connect('app.db')\ncursor = conn.cursor()\n\n# relational: tables + SQL + joins\ncursor.execute('SELECT * FROM users WHERE age > ?', (18,))"
+      },
+      "mongoose": {
+        "definition": "Mongoose is an ODM (Object-Document Mapper) for MongoDB — a document database storing flexible BSON/JSON-like documents. You define schemas in JS and query with a chainable API.",
+        "code": "const mongoose = require('mongoose');\nawait mongoose.connect('mongodb://localhost/mydb');\n\n// document: collections of flexible objects\nconst users = await User.find({ age: { $gt: 18 } });"
+      },
+      "resources": [
+        { "label": "Python — sqlite3", "url": "https://docs.python.org/3/library/sqlite3.html" },
+        { "label": "SQLite docs", "url": "https://www.sqlite.org/docs.html" },
+        { "label": "Mongoose docs", "url": "https://mongoosejs.com/docs/" },
+        { "label": "MongoDB docs", "url": "https://www.mongodb.com/docs/" }
+      ]
+    },
+    {
+      "id": "connecting",
+      "title": "Connecting to the Database",
+      "learn": "Opening a connection and preparing it.",
+      "sqlite": {
+        "definition": "sqlite3.connect() opens (or creates) a .db file — no server needed. Connections should be closed or used as context managers; row_factory gives dict-like rows.",
+        "code": "import sqlite3\n\nconn = sqlite3.connect('app.db')\nconn.row_factory = sqlite3.Row  # rows as dicts\n\ncursor = conn.cursor()\ncursor.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT)')\nconn.commit()\nconn.close()"
+      },
+      "mongoose": {
+        "definition": "mongoose.connect() opens a connection to a MongoDB server (local or Atlas cloud). Connection options set timeouts; models are compiled from schemas per collection.",
+        "code": "const mongoose = require('mongoose');\n\nawait mongoose.connect('mongodb://localhost:27017/myapp', {\n  serverSelectionTimeoutMS: 5000\n});\n\n// ready event\nmongoose.connection.on('connected', () => console.log('db ready'));"
+      },
+      "resources": [
+        { "label": "sqlite3 — Connection", "url": "https://docs.python.org/3/library/sqlite3.html#sqlite3.connect" },
+        { "label": "Mongoose — Connect", "url": "https://mongoosejs.com/docs/connections.html" }
+      ]
+    },
+    {
+      "id": "schema-model",
+      "title": "Schema & Model Definition",
+      "learn": "Declaring what data looks like.",
+      "sqlite": {
+        "definition": "Schema = CREATE TABLE with typed columns, constraints (PRIMARY KEY, NOT NULL, UNIQUE, FOREIGN KEY). SQLite is dynamically typed but column affinities hint types.",
+        "code": "cursor.execute('''\nCREATE TABLE users (\n  id INTEGER PRIMARY KEY AUTOINCREMENT,\n  name TEXT NOT NULL,\n  email TEXT UNIQUE,\n  age INTEGER,\n  created_at TEXT DEFAULT CURRENT_TIMESTAMP\n)\n''')\nconn.commit()"
+      },
+      "mongoose": {
+        "definition": "You define a Schema (fields, types, required, defaults, validators) then compile it into a Model — one model per collection. Schemas are flexible but enforce shape.",
+        "code": "const userSchema = new mongoose.Schema({\n  name: { type: String, required: true },\n  email: { type: String, unique: true, lowercase: true },\n  age: { type: Number, min: 0 },\n  createdAt: { type: Date, default: Date.now }\n});\n\nconst User = mongoose.model('User', userSchema);"
+      },
+      "resources": [
+        { "label": "SQLite — CREATE TABLE", "url": "https://www.sqlite.org/lang_createtable.html" },
+        { "label": "Mongoose — Schemas", "url": "https://mongoosejs.com/docs/guide.html" }
+      ]
+    },
+    {
+      "id": "create-data",
+      "title": "Creating Records",
+      "learn": "Inserting new rows/documents.",
+      "sqlite": {
+        "definition": "INSERT INTO with parameterised queries (?) prevents SQL injection — never format user input into SQL strings.",
+        "code": "cursor.execute(\n  'INSERT INTO users (name, email, age) VALUES (?, ?, ?)',\n  ('Alice', 'alice@example.com', 30)\n)\nconn.commit()\nnew_id = cursor.lastrowid\nprint('inserted id:', new_id)"
+      },
+      "mongoose": {
+        "definition": "Create via new Model(data).save() or Model.create(data) — schema validation runs automatically; hooks (pre/post) can transform data.",
+        "code": "const user = new User({\n  name: 'Alice',\n  email: 'ALICE@EXAMPLE.COM', // lowercased by schema\n  age: 30\n});\nawait user.save();\n\n// or one-liner\nconst u2 = await User.create({ name: 'Bob', email: 'bob@x.com' });"
+      },
+      "resources": [
+        { "label": "SQLite — INSERT", "url": "https://www.sqlite.org/lang_insert.html" },
+        { "label": "Mongoose — Documents", "url": "https://mongoosejs.com/docs/guide.html#saving" }
+      ]
+    },
+    {
+      "id": "read-query",
+      "title": "Reading & Querying",
+      "learn": "Fetching data with filters and conditions.",
+      "sqlite": {
+        "definition": "SELECT with WHERE, ORDER BY, LIMIT, JOIN and aggregates. Parameterised placeholders keep queries safe.",
+        "code": "cursor.execute('''\nSELECT id, name FROM users\nWHERE age >= ? AND city = ?\nORDER BY name LIMIT 10\n''', (18, 'Paris'))\nrows = cursor.fetchall()\n\nfor row in rows:\n    print(dict(row))  # Row factory → dict"
+      },
+      "mongoose": {
+        "definition": "Model.find() with a filter object returns documents; chain .sort(), .limit(), .select() for shaping. Comparisons use $gt/$lt/$in operators.",
+        "code": "const users = await User.find({\n  age: { $gte: 18 },\n  city: 'Paris'\n})\n  .sort({ name: 1 })\n  .limit(10)\n  .select('name email'); // exclude heavy fields\n\n// single doc\nconst one = await User.findOne({ email });"
+      },
+      "resources": [
+        { "label": "SQLite — SELECT", "url": "https://www.sqlite.org/lang_select.html" },
+        { "label": "Mongoose — Queries", "url": "https://mongoosejs.com/docs/queries.html" }
+      ]
+    },
+    {
+      "id": "update-delete",
+      "title": "Updating & Deleting",
+      "learn": "Modifying and removing records.",
+      "sqlite": {
+        "definition": "UPDATE/DELETE statements target rows via WHERE — always commit() after writes. Use RETURNING (SQLite 3.35+) to get changed rows back.",
+        "code": "cursor.execute(\n  'UPDATE users SET age = age + 1 WHERE id = ?',\n  (user_id,)\n)\nconn.commit()\n\n# delete\ncursor.execute('DELETE FROM users WHERE id = ?', (user_id,))\nconn.commit()\n\n# verify\nchanges = cursor.rowcount"
+      },
+      "mongoose": {
+        "definition": "Modify via doc.save() after changing fields, or atomic Model.updateOne/updateMany/findByIdAndUpdate with operators like $set/$inc.",
+        "code": "// load → change → save\nconst u = await User.findById(id);\nu.age += 1;\nawait u.save();\n\n// atomic (no load needed)\nawait User.updateOne(\n  { _id: id },\n  { $inc: { age: 1 }, $set: { lastSeen: new Date() } }\n);\n\nawait User.deleteOne({ _id: id });"
+      },
+      "resources": [
+        { "label": "SQLite — UPDATE/DELETE", "url": "https://www.sqlite.org/lang_update.html" },
+        { "label": "Mongoose — Updating docs", "url": "https://mongoosejs.com/docs/queries.html#update-queries" }
+      ]
+    },
+    {
+      "id": "relationships",
+      "title": "Relationships Between Data",
+      "learn": "Linking records across tables/collections.",
+      "sqlite": {
+        "definition": "Relational joins: FOREIGN KEY links tables; JOIN queries combine them. Normalisation avoids duplication — one source of truth per fact.",
+        "code": "CREATE TABLE orders (\n  id INTEGER PRIMARY KEY,\n  user_id INTEGER REFERENCES users(id),\n  total REAL\n);\n\nSELECT u.name, o.total\nFROM users u\nJOIN orders o ON o.user_id = u.id\nWHERE o.total > 100;"
+      },
+      "mongoose": {
+        "definition": "Two patterns: referencing (store ObjectId, populate() to join) or embedding (nest sub-docs). Choose embed for owned/1-few, reference for large/shared data.",
+        "code": "// referencing\nconst orderSchema = new Schema({\n  user: { type: ObjectId, ref: 'User' },\n  total: Number\n});\n\n// populate = JOIN equivalent\nconst orders = await Order.find().populate('user');\n// each order.user is now the full user doc"
+      },
+      "resources": [
+        { "label": "SQLite — Foreign keys", "url": "https://www.sqlite.org/foreignkeys.html" },
+        { "label": "Mongoose — Populate", "url": "https://mongoosejs.com/docs/populate.html" },
+        { "label": "MongoDB — Data modeling", "url": "https://www.mongodb.com/docs/manual/core/data-model-design/" }
+      ]
+    },
+    {
+      "id": "when-to-choose",
+      "title": "When to Choose Which",
+      "learn": "SQLite+SQL vs MongoDB+Mongoose trade-offs.",
+      "sqlite": {
+        "definition": "Pick SQLite/sqlite3 for: small apps, embedded/local-first software, strict schemas, complex JOIN-heavy reporting, zero-infrastructure deployments, ACID guarantees.",
+        "code": "# Great for:\n# - desktop/mobile apps (ships inside the app)\n# - prototypes & learning SQL\n# - financial/regulated data (ACID)\n# - reporting with multi-table joins\n\n# Limit: single writer at a time, no horizontal scale"
+      },
+      "mongoose": {
+        "definition": "Pick Mongoose/MongoDB for: flexible/evolving schemas, document-shaped data (users, catalogs), rapid iteration, horizontal scaling, JSON-native APIs, high write throughput.",
+        "code": "// Great for:\n// - startups iterating on product shape\n// - content with varying fields\n// - IoT/telemetry (high write volume)\n// - microservices storing JSON docs\n\n// Trade-off: no joins → embed or $lookup;\n// eventual consistency in replica sets"
+      },
+      "resources": [
+        { "label": "SQLite — When to use", "url": "https://www.sqlite.org/whentouse.html" },
+        { "label": "MongoDB — Use cases", "url": "https://www.mongodb.com/docs/manual/faq/fundamentals/" },
+        { "label": "SQL vs NoSQL", "url": "https://www.mongodb.com/resources/basics/sql-vs-nosql-differences" }
+      ]
+    }
+  ]
+}

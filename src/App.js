@@ -14,8 +14,31 @@ import djangoSpringData from './data/django-spring.json';
 import javaCoreA from './data/java-core-a.json';
 import javaCoreB from './data/java-core-b.json';
 import springAnnotations from './data/spring-annotations.json';
+import nodeJsData from './data/nodejs.json';
+import backend3Data from './data/backend-3way.json';
+import frontendData from './data/frontend.json';
+import cssTailwindData from './data/css-tailwind.json';
+import keyValueData from './data/keyvalue.json';
+import sqliteMongooseData from './data/sqlite-mongoose.json';
+import pythonFrameworksData from './data/python-frameworks.json';
 
-const SECTIONS = [basicsData, advancedData, databaseData, djangoSpringData, javaCoreA, javaCoreB, springAnnotations];
+// Normalize every section to expose a `columns` array:
+// [{ key, label, color }] — legacy files derive it from leftLabel/rightLabel
+// (topics store content under the 'python'/'java' keys), new files define it explicitly.
+const normalizeSection = (raw) => ({
+  ...raw,
+  columns: raw.columns || [
+    { key: 'python', label: raw.leftLabel, color: raw.leftColor },
+    { key: 'java', label: raw.rightLabel, color: raw.rightColor },
+  ],
+});
+
+const SECTIONS = [
+  basicsData, advancedData, databaseData, djangoSpringData,
+  javaCoreA, javaCoreB, springAnnotations,
+  nodeJsData, backend3Data, frontendData, cssTailwindData, keyValueData, sqliteMongooseData,
+  pythonFrameworksData,
+].map(normalizeSection);
 
 function App() {
   const [theme, setTheme] = useState('dark');
@@ -76,10 +99,6 @@ function App() {
           {activeTopic && activeSection ? (
             <ComparisonView
               topic={activeTopic}
-              leftLabel={activeSection.leftLabel}
-              rightLabel={activeSection.rightLabel}
-              leftColor={activeSection.leftColor}
-              rightColor={activeSection.rightColor}
               onRunInPlayground={openPlayground}
               section={activeSection}
               onOpenTopic={openTopic}

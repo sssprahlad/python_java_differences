@@ -1,0 +1,178 @@
+{
+  "section": {
+    "id": "keyvalue",
+    "title": "Key-Value Data — dict, Map, Object & Document",
+    "subtitle": "How Python dicts, Java Maps, JS objects and MongoDB documents store and retrieve data by key.",
+    "color": "#f59e0b"
+  },
+  "columns": [
+    { "key": "python", "label": "Python dict", "color": "#3776ab" },
+    { "key": "java", "label": "Java Map", "color": "#b07219" },
+    { "key": "js", "label": "JavaScript Object", "color": "#d4a72c" },
+    { "key": "mongo", "label": "MongoDB Document", "color": "#47a248" }
+  ],
+  "topics": [
+    {
+      "id": "creating",
+      "title": "Creating Key-Value Data",
+      "learn": "Declaring an empty or pre-filled store.",
+      "python": {
+        "definition": "dict literals use {key: value}. dict() or dict.fromkeys() build them programmatically; keys must be hashable (immutable).",
+        "code": "user = {'name': 'Alice', 'age': 30}\nempty = {}\nfrom_keys = dict.fromkeys(['a', 'b'], 0)\n\n# any immutable key works\nmixed = {(1, 2): 'tuple key', 's': [1, 2]}"
+      },
+      "java": {
+        "definition": "Maps come as interfaces: HashMap (fast, unordered), LinkedHashMap (insertion order), TreeMap (sorted). Created via constructors or Map.of() factories.",
+        "code": "Map<String, Integer> ages = new HashMap<>();\nages.put(\"Alice\", 30);\n\n// factory methods (Java 9+)\nMap<String, Integer> m = Map.of(\"a\", 1, \"b\", 2);\nMap<String, Integer> linked = new LinkedHashMap<>();"
+      },
+      "js": {
+        "definition": "Object literals use {key: value}. Keys are strings (or symbols); values can be anything including functions and nested objects.",
+        "code": "const user = { name: 'Alice', age: 30 };\nconst empty = {};\n\n// dynamic keys\nconst key = 'city';\nuser[key] = 'Paris'; // user.city = 'Paris'"
+      },
+      "mongo": {
+        "definition": "A document is a BSON object — like a JSON object with typed values (_id is auto-added). Documents group into collections (like tables).",
+        "code": "// insert one document\ndb.users.insertOne({\n  name: \"Alice\",\n  age: 30,\n  address: { city: \"Paris\" }  // nested doc\n});\n\n// _id: ObjectId auto-generated"
+      },
+      "resources": [
+        { "label": "Python — dict", "url": "https://docs.python.org/3/tutorial/datastructures.html#dictionaries" },
+        { "label": "Java — Map", "url": "https://docs.oracle.com/javase/tutorial/collections/interfaces/map.html" },
+        { "label": "MDN — Objects", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object" },
+        { "label": "MongoDB — Documents", "url": "https://www.mongodb.com/docs/manual/core/document/" }
+      ]
+    },
+    {
+      "id": "read-write",
+      "title": "Reading & Writing Values",
+      "learn": "Getting and setting values by key.",
+      "python": {
+        "definition": "Access via d[key]; assignment d[key] = v adds or overwrites. .get(key, default) avoids KeyError for missing keys.",
+        "code": "user = {'name': 'Alice', 'age': 30}\nprint(user['name'])        # Alice\nuser['city'] = 'Paris'     # add key\nuser['age'] = 31           # update\n\nprint(user.get('zip', 'N/A'))  # safe default"
+      },
+      "java": {
+        "definition": "map.get(key) returns value or null; map.put(key, value) inserts/updates; putIfAbsent and computeIfAbsent offer atomic variants.",
+        "code": "Map<String, Integer> ages = new HashMap<>();\nages.put(\"Alice\", 30);\nSystem.out.println(ages.get(\"Alice\")); // 30\nages.put(\"Alice\", 31); // update\n\nages.putIfAbsent(\"Bob\", 25);\nages.merge(\"Alice\", 1, Integer::sum); // atomic update"
+      },
+      "js": {
+        "definition": "obj.key or obj['key'] reads; assignment writes. The in operator and optional chaining (?.) handle missing keys safely.",
+        "code": "const user = { name: 'Alice', age: 30 };\nconsole.log(user.name);       // Alice\nuser.city = 'Paris';          // add\nuser.age = 31;                // update\n\nconsole.log('zip' in user);   // false\nconsole.log(user.address?.city); // undefined-safe"
+      },
+      "mongo": {
+        "definition": "Read with find()/findOne() using query operators; update with updateOne/updateMany using $set, $inc, $push.",
+        "code": "db.users.findOne({ name: \"Alice\" });\n\ndb.users.updateOne(\n  { name: \"Alice\" },\n  { $set: { age: 31, city: \"Paris\" },\n    $inc: { logins: 1 } }\n);\n\n// upsert: updateOne(filter, update, { upsert: true })"
+      },
+      "resources": [
+        { "label": "Python — dict methods", "url": "https://docs.python.org/3/library/stdtypes.html#mapping-types-dict" },
+        { "label": "Java — Map methods", "url": "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Map.html" },
+        { "label": "MDN — Property access", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Property_accessors" },
+        { "label": "MongoDB — Update operators", "url": "https://www.mongodb.com/docs/manual/reference/operator/update/" }
+      ]
+    },
+    {
+      "id": "nesting",
+      "title": "Nested & Complex Values",
+      "learn": "Storing structures inside structures.",
+      "python": {
+        "definition": "Values can be any object — lists, dicts, sets nest freely. No schema enforced; mixed types per key are allowed.",
+        "code": "user = {\n  'name': 'Alice',\n  'tags': ['admin', 'dev'],        # list\n  'address': {'city': 'Paris'},   # nested dict\n  'meta': {'login_count': 5}\n}\n\nprint(user['address']['city'])  # Paris\nuser['tags'].append('lead')"
+      },
+      "java": {
+        "definition": "Generics allow nested types: Map<String, List<String>>, Map<String, Map<String,Integer>>. Values are strongly typed per declaration.",
+        "code": "Map<String, Object> user = new HashMap<>();\nuser.put(\"name\", \"Alice\");\nuser.put(\"tags\", List.of(\"admin\", \"dev\"));\n\n// typed nesting\nMap<String, Map<String, Integer>> scores = new HashMap<>();\nscores.put(\"Alice\", Map.of(\"math\", 90, \"cs\", 95));"
+      },
+      "js": {
+        "definition": "Objects nest infinitely — objects inside objects, arrays of objects, functions as values. JSON.stringify serialises the whole tree.",
+        "code": "const user = {\n  name: 'Alice',\n  tags: ['admin', 'dev'],\n  address: { city: 'Paris', zip: '75001' },\n  greet() { return `Hi ${this.name}`; }\n};\n\nconsole.log(user.address.city);  // Paris\nuser.tags.push('lead');"
+      },
+      "mongo": {
+        "definition": "Documents nest sub-documents and arrays natively — a user doc can embed address, orders[] with line items, etc. 16MB doc limit applies.",
+        "code": "db.users.insertOne({\n  name: \"Alice\",\n  address: { city: \"Paris\", zip: \"75001\" },\n  orders: [\n    { id: 1, total: 49.99, items: [\"book\", \"pen\"] },\n    { id: 2, total: 12.50, items: [\"mug\"] }\n  ]\n});\n\n// query nested: { \"address.city\": \"Paris\" }"
+      },
+      "resources": [
+        { "label": "Python — Nested structures", "url": "https://docs.python.org/3/tutorial/datastructures.html" },
+        { "label": "Java — Generics", "url": "https://docs.oracle.com/javase/tutorial/java/generics/" },
+        { "label": "MDN — Nested objects", "url": "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_basics" },
+        { "label": "MongoDB — Embedded documents", "url": "https://www.mongodb.com/docs/manual/core/data-model-design/" }
+      ]
+    },
+    {
+      "id": "iterating",
+      "title": "Iterating Over Entries",
+      "learn": "Looping through every key-value pair.",
+      "python": {
+        "definition": ".items() yields (key, value) tuples; .keys()/.values() iterate just one side. Dict comprehensions build new dicts in one line.",
+        "code": "user = {'name': 'Alice', 'age': 30}\n\nfor k, v in user.items():\n    print(k, '=>', v)\n\n# comprehension\nsquared = {k: v**2 for k, v in {'a': 2, 'b': 3}.items()}\n# {'a': 4, 'b': 9}"
+      },
+      "java": {
+        "definition": "entrySet() gives Set<Map.Entry<K,V>> for key+value loops; forEach with BiConsumer is the modern idiom.",
+        "code": "Map<String, Integer> ages = Map.of(\"a\", 1, \"b\", 2);\n\nfor (Map.Entry<String, Integer> e : ages.entrySet()) {\n    System.out.println(e.getKey() + \" => \" + e.getValue());\n}\n\nages.forEach((k, v) -> System.out.println(k + \" => \" + v));"
+      },
+      "js": {
+        "definition": "for...in loops keys, Object.entries() gives [key, value] pairs, Object.keys()/values() give arrays. for...of works on entries().",
+        "code": "const user = { name: 'Alice', age: 30 };\n\nfor (const [k, v] of Object.entries(user)) {\n  console.log(k, '=>', v);\n}\n\nObject.keys(user).forEach(k => console.log(k));"
+      },
+      "mongo": {
+        "definition": "find() returns a cursor you iterate document-by-document; aggregation pipeline ($project, $group) reshapes results server-side.",
+        "code": "db.users.find({ age: { $gte: 18 } })\n  .forEach(u => print(u.name));\n\n// cursor methods\ndb.users.find().sort({ age: -1 }).limit(5);\n\n// aggregation\ndb.users.aggregate([\n  { $group: { _id: \"$city\", count: { $sum: 1 } } }\n]);"
+      },
+      "resources": [
+        { "label": "Python — dict iteration", "url": "https://docs.python.org/3/tutorial/datastructures.html#looping-techniques" },
+        { "label": "Java — Map iteration", "url": "https://docs.oracle.com/javase/tutorial/collections/iterators.html" },
+        { "label": "MDN — Object.entries", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries" },
+        { "label": "MongoDB — Cursor", "url": "https://www.mongodb.com/docs/manual/core/cursors/" }
+      ]
+    },
+    {
+      "id": "json-serialization",
+      "title": "JSON Serialization",
+      "learn": "Converting key-value data to/from JSON text.",
+      "python": {
+        "definition": "json.dumps() turns dicts/lists into JSON strings; json.loads() parses back. dict ↔ JSON maps cleanly since JSON objects are dict-like.",
+        "code": "import json\nuser = {'name': 'Alice', 'age': 30, 'tags': ['dev']}\n\ntext = json.dumps(user)      # str\nback = json.loads(text)      # dict\n\n# file round-trip\nwith open('user.json', 'w') as f:\n    json.dump(user, f, indent=2)"
+      },
+      "java": {
+        "definition": "Jackson (or Gson) serialises POJOs ↔ JSON via annotations. Maps serialise natively too — keys become JSON property names.",
+        "code": "ObjectMapper om = new ObjectMapper();\nMap<String, Object> user = Map.of(\"name\", \"Alice\", \"age\", 30);\n\nString json = om.writeValueAsString(user);\nMap<?, ?> back = om.readValue(json, Map.class);\n\n// or @JsonProperty on POJO fields"
+      },
+      "js": {
+        "definition": "JSON is native: JSON.stringify(obj) → string, JSON.parse(str) → object. undefined/functions are dropped; Dates need toJSON or revivers.",
+        "code": "const user = { name: 'Alice', age: 30, created: new Date() };\nconst text = JSON.stringify(user, null, 2); // pretty-print\nconst back = JSON.parse(text);\n\n// custom serialisation\nJSON.stringify(user, (k, v) => v instanceof Date ? v.toISOString() : v);"
+      },
+      "mongo": {
+        "definition": "MongoDB stores BSON natively — documents are already JSON-like, so no serialisation needed for storage. Export via mongoexport to JSON/CSV.",
+        "code": "// documents ARE the storage format (BSON ~ binary JSON)\ndb.users.find().forEach(printjson); // print as JSON\n\n// shell → JSON file\nmongoexport --db mydb --collection users --out users.json\n\n// EJSON for shell round-trips: EJSON.stringify(doc)"
+      },
+      "resources": [
+        { "label": "Python — json", "url": "https://docs.python.org/3/library/json.html" },
+        { "label": "Jackson docs", "url": "https://github.com/FasterXML/jackson" },
+        { "label": "MDN — JSON", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON" },
+        { "label": "MongoDB — mongoexport", "url": "https://www.mongodb.com/docs/database-tools/mongoexport/" }
+      ]
+    },
+    {
+      "id": "choosing",
+      "title": "Choosing the Right One",
+      "learn": "When each key-value structure fits best.",
+      "python": {
+        "definition": "dict is Python's default map — fast lookups, used everywhere (kwargs, JSON, namespaces). Ordered by insertion since 3.7.",
+        "code": "# Best for: config, JSON data, memoization,\n# counting (collections.Counter), grouping\n\nfrom collections import Counter\nwords = ['a', 'b', 'a']\nprint(Counter(words))  # Counter({'a': 2, 'b': 1})"
+      },
+      "java": {
+        "definition": "HashMap for speed, LinkedHashMap for order, TreeMap for sorting, ConcurrentHashMap for threads. Immutable Map.of() for constants.",
+        "code": "// choose by need:\nMap<String,Integer> fast   = new HashMap<>();\nMap<String,Integer> ordered = new LinkedHashMap<>();\nMap<String,Integer> sorted  = new TreeMap<>();\nMap<String,Integer> safe    = new ConcurrentHashMap<>();\n\n// EnumMap for enum keys — fastest"
+      },
+      "js": {
+        "definition": "Plain objects for small fixed-shape data; Map for dynamic keys, iteration order guarantees, and non-string keys. Set for unique values.",
+        "code": "// object — JSON-friendly, prototype keys risk\nconst config = { retries: 3 };\n\n// Map — any key type, safe iteration\nconst cache = new Map();\ncache.set(userObj, data); // object as key!\n\n// Set — unique values only\nconst ids = new Set([1, 2, 2, 3]); // {1,2,3}"
+      },
+      "mongo": {
+        "definition": "Documents fit schemaless/varied data, nested structures, and horizontal scale. Use when data is document-shaped (users, products, logs) not table-shaped.",
+        "code": "// Best for: user profiles, catalogs, IoT data,\n// content with varying fields per record\n\n// Schema validation still possible:\ndb.createCollection('users', {\n  validator: { $jsonSchema: {\n    bsonType: 'object',\n    required: ['name', 'email']\n  }}\n});"
+      },
+      "resources": [
+        { "label": "Python — collections", "url": "https://docs.python.org/3/library/collections.html" },
+        { "label": "Java — Map implementations", "url": "https://docs.oracle.com/javase/tutorial/collections/implementations/map.html" },
+        { "label": "MDN — Map vs Object", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Keyed_collections" },
+        { "label": "MongoDB — Data models", "url": "https://www.mongodb.com/docs/manual/core/data-model-design/" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "section": {
+    "id": "nodejs",
+    "title": "Node.js vs Python — Server-Side Concepts",
+    "subtitle": "Runtime, packages, async programming, modules, files, HTTP servers, JSON and errors.",
+    "color": "#68a063"
+  },
+  "columns": [
+    { "key": "node", "label": "Node.js", "color": "#68a063" },
+    { "key": "python", "label": "Python", "color": "#3776ab" }
+  ],
+  "topics": [
+    {
+      "id": "runtime-execution",
+      "title": "Runtime & Execution Model",
+      "learn": "How each runtime executes your code.",
+      "node": {
+        "definition": "Node.js runs JavaScript on the V8 engine (same as Chrome). It is single-threaded with an event loop — ideal for I/O-heavy apps like APIs and real-time servers.",
+        "code": "// node app.js — runs directly, no compilation\nconsole.log('Hello from Node', process.version);\n\n// Event loop handles many requests concurrently\n// without spawning threads."
+      },
+      "python": {
+        "definition": "Python code is interpreted line-by-line by the CPython interpreter. The GIL allows only one thread to run Python bytecode at a time, so concurrency relies on asyncio or multi-processing.",
+        "code": "# python app.py — interpreted, no compilation step\nimport sys\nprint('Hello from Python', sys.version)\n\n# For concurrency use asyncio or multiprocessing."
+      },
+      "resources": [
+        { "label": "Node.js docs — About Node", "url": "https://nodejs.org/en/learn" },
+        { "label": "Python docs — Execution model", "url": "https://docs.python.org/3/reference/executionmodel.html" }
+      ]
+    },
+    {
+      "id": "package-management",
+      "title": "Package Management",
+      "learn": "Installing and managing dependencies.",
+      "node": {
+        "definition": "npm (bundled with Node) installs packages from the npm registry into node_modules. package.json declares dependencies; package-lock.json pins exact versions.",
+        "code": "npm init -y\nnpm install express\n\n// package.json\n{\n  \"dependencies\": { \"express\": \"^4.19.0\" }\n}\n\n// use it\nconst express = require('express');"
+      },
+      "python": {
+        "definition": "pip installs packages from PyPI into site-packages. requirements.txt (or pyproject.toml) declares dependencies and pinned versions.",
+        "code": "pip install flask\n\n# requirements.txt\nFlask==3.0.0\n\n# use it\nfrom flask import Flask\napp = Flask(__name__)"
+      },
+      "resources": [
+        { "label": "npm docs", "url": "https://docs.npmjs.com/" },
+        { "label": "pip docs", "url": "https://pip.pypa.io/en/stable/" }
+      ]
+    },
+    {
+      "id": "async-programming",
+      "title": "Async & Concurrency",
+      "learn": "Handling many tasks without blocking.",
+      "node": {
+        "definition": "Node is natively asynchronous — I/O uses callbacks, Promises and async/await. The event loop juggles thousands of connections in one thread.",
+        "code": "// async/await style\nasync function getUser(id) {\n  const res = await fetch(`https://api.example.com/users/${id}`);\n  return res.json();\n}\n\ngetUser(1).then(u => console.log(u));"
+      },
+      "python": {
+        "definition": "Python offers threads (limited by the GIL), multiprocessing, and asyncio with async/await for I/O-bound concurrency.",
+        "code": "import asyncio\n\nasync def get_user(uid):\n    await asyncio.sleep(0.1)\n    return {'id': uid}\n\nasync def main():\n    user = await get_user(1)\n    print(user)\n\nasyncio.run(main())"
+      },
+      "resources": [
+        { "label": "Node — Async hooks / event loop", "url": "https://nodejs.org/en/learn/asynchronous-work/overview-of-blocking-vs-non-blocking" },
+        { "label": "Python — asyncio", "url": "https://docs.python.org/3/library/asyncio.html" }
+      ]
+    },
+    {
+      "id": "modules-imports",
+      "title": "Modules & Imports",
+      "learn": "Splitting code into reusable files.",
+      "node": {
+        "definition": "CommonJS uses require() to import and module.exports to export. Modern code also supports ES modules with import/export (type: \"module\" in package.json).",
+        "code": "// math.js\nfunction add(a, b) { return a + b; }\nmodule.exports = { add };\n\n// app.js\nconst { add } = require('./math');\nconsole.log(add(2, 3)); // 5"
+      },
+      "python": {
+        "definition": "Python imports modules with the import statement. Each .py file is a module; __init__.py marks a package. Imports can pull specific names with from x import y.",
+        "code": "# math_utils.py\ndef add(a, b):\n    return a + b\n\n# app.py\nfrom math_utils import add\nprint(add(2, 3))  # 5"
+      },
+      "resources": [
+        { "label": "Node — Modules", "url": "https://nodejs.org/api/modules.html" },
+        { "label": "Python — Modules", "url": "https://docs.python.org/3/tutorial/modules.html" }
+      ]
+    },
+    {
+      "id": "file-system",
+      "title": "File System Access",
+      "learn": "Reading and writing files.",
+      "node": {
+        "definition": "The built-in fs module reads/writes files asynchronously (non-blocking) or synchronously with *Sync variants.",
+        "code": "const fs = require('fs');\n\n// async (preferred)\nfs.readFile('data.txt', 'utf8', (err, data) => {\n  if (err) throw err;\n  console.log(data);\n});\n\n// sync version\nconst text = fs.readFileSync('data.txt', 'utf8');\nfs.writeFileSync('out.txt', text.toUpperCase());"
+      },
+      "python": {
+        "definition": "Built-in open() reads/writes files using a context manager (with) that auto-closes the file. pathlib offers an object-oriented API.",
+        "code": "# read + write with context manager\nwith open('data.txt', 'r') as f:\n    text = f.read()\n\nwith open('out.txt', 'w') as f:\n    f.write(text.upper())\n\n# pathlib style\nfrom pathlib import Path\nPath('out2.txt').write_text(text)"
+      },
+      "resources": [
+        { "label": "Node — fs module", "url": "https://nodejs.org/api/fs.html" },
+        { "label": "Python — Reading/writing files", "url": "https://docs.python.org/3/tutorial/inputoutput.html" }
+      ]
+    },
+    {
+      "id": "http-server",
+      "title": "HTTP Server",
+      "learn": "Creating a basic web server / API.",
+      "node": {
+        "definition": "Node's built-in http module (or Express on top) creates servers. Everything is a request/response cycle handled by callbacks — no extra runtime needed.",
+        "code": "const http = require('http');\n\nhttp.createServer((req, res) => {\n  res.writeHead(200, { 'Content-Type': 'application/json' });\n  res.end(JSON.stringify({ msg: 'Hello from Node' }));\n}).listen(3000, () => console.log('listening on :3000'));"
+      },
+      "python": {
+        "definition": "Python's http.server handles basic serving; frameworks like Flask or FastAPI provide routing and JSON APIs on top of the standard library.",
+        "code": "from flask import Flask, jsonify\napp = Flask(__name__)\n\n@app.route('/')\ndef home():\n    return jsonify({'msg': 'Hello from Python'})\n\nif __name__ == '__main__':\n    app.run(port=3000)"
+      },
+      "resources": [
+        { "label": "Node — http module", "url": "https://nodejs.org/api/http.html" },
+        { "label": "Flask docs", "url": "https://flask.palletsprojects.com/" }
+      ]
+    },
+    {
+      "id": "json-handling",
+      "title": "JSON Handling",
+      "learn": "Parsing and producing JSON — the lingua franca of APIs.",
+      "node": {
+        "definition": "JSON is built into JavaScript: JSON.parse() converts text to objects, JSON.stringify() converts objects to text.",
+        "code": "const json = '{\"name\":\"Alice\",\"age\":30}';\nconst obj = JSON.parse(json);\nconsole.log(obj.name); // Alice\n\nconst out = JSON.stringify({ ok: true, count: 2 });\nconsole.log(out); // {\"ok\":true,\"count\":2}"
+      },
+      "python": {
+        "definition": "The json module converts between Python dicts/lists and JSON strings with json.loads() and json.dumps().",
+        "code": "import json\n\ntext = '{\"name\": \"Alice\", \"age\": 30}'\nobj = json.loads(text)\nprint(obj['name'])  # Alice\n\nout = json.dumps({'ok': True, 'count': 2})\nprint(out)  # {\"ok\": true, \"count\": 2}"
+      },
+      "resources": [
+        { "label": "MDN — JSON", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON" },
+        { "label": "Python — json", "url": "https://docs.python.org/3/library/json.html" }
+      ]
+    },
+    {
+      "id": "error-handling",
+      "title": "Error Handling",
+      "learn": "Catching and throwing errors.",
+      "node": {
+        "definition": "JavaScript uses try/catch/finally. You can throw any value, but Error objects carry stack traces. Async errors surface as rejected Promises.",
+        "code": "function divide(a, b) {\n  if (b === 0) throw new Error('Division by zero');\n  return a / b;\n}\n\ntry {\n  console.log(divide(10, 2));\n  console.log(divide(1, 0));\n} catch (err) {\n  console.error('Caught:', err.message);\n} finally {\n  console.log('cleanup always runs');\n}"
+      },
+      "python": {
+        "definition": "Python uses try/except/else/finally. Built-in exception classes (ValueError, TypeError…) are raised with raise and caught by type.",
+        "code": "def divide(a, b):\n    if b == 0:\n        raise ZeroDivisionError('division by zero')\n    return a / b\n\ntry:\n    print(divide(10, 2))\n    print(divide(1, 0))\nexcept ZeroDivisionError as e:\n    print('Caught:', e)\nfinally:\n    print('cleanup always runs')"
+      },
+      "resources": [
+        { "label": "MDN — try...catch", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch" },
+        { "label": "Python — Exceptions", "url": "https://docs.python.org/3/tutorial/errors.html" }
+      ]
+    }
+  ]
+}

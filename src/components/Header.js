@@ -6,8 +6,8 @@ function Header({ query, onQueryChange, theme, onToggleTheme }) {
       <div className="header-brand">
         <span onClick={() => window.location.reload()} className="brand-icon">&lt;/&gt;</span>
         <div>
-          <h1 className="brand-title">Python ⇄ Java Playground</h1>
-          <p className="brand-sub">Learn both languages side by side — with Spring Boot &amp; Django</p>
+          <h1 className="brand-title">Polyglot Code Playground</h1>
+          <p className="brand-sub">Compare Python, Java, Node.js, React, databases &amp; more — side by side</p>
         </div>
       </div>
 
@@ -16,7 +16,7 @@ function Header({ query, onQueryChange, theme, onToggleTheme }) {
           <span className="search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Search topics… (e.g. loops, OOP, JWT)"
+            placeholder="Search topics… (e.g. loops, OOP, JWT, hooks)"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
           />

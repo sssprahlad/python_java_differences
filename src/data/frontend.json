@@ -1,0 +1,232 @@
+{
+  "section": {
+    "id": "frontend",
+    "title": "React vs Angular vs Next.js vs TypeScript",
+    "subtitle": "UI libraries, a full framework, a React meta-framework and the typed language — how each builds modern frontends.",
+    "color": "#61dafb"
+  },
+  "columns": [
+    { "key": "react", "label": "React", "color": "#61dafb" },
+    { "key": "angular", "label": "Angular", "color": "#dd0031" },
+    { "key": "next", "label": "Next.js", "color": "#0f172a" },
+    { "key": "ts", "label": "TypeScript", "color": "#3178c6" }
+  ],
+  "topics": [
+    {
+      "id": "what-it-is",
+      "title": "What It Actually Is",
+      "learn": "Library vs framework vs language — they solve different layers of the problem.",
+      "react": {
+        "definition": "React is a UI library for building component trees with JSX. It handles rendering and state; you choose router, state manager and build tools yourself.",
+        "code": "function App() {\n  return <h1>Hello React</h1>;\n}\n// Just the view layer — the rest is up to you."
+      },
+      "angular": {
+        "definition": "Angular is a full-featured framework (by Google) with components, DI, routing, forms and HTTP built in — everything is provided out of the box.",
+        "code": "@Component({\n  selector: 'app-root',\n  template: '<h1>Hello Angular</h1>'\n})\nexport class AppComponent {}\n// Framework decides the structure for you."
+      },
+      "next": {
+        "definition": "Next.js is a React framework adding SSR/SSG, file-based routing, API routes and image optimisation — production React without config.",
+        "code": "// app/page.tsx — file = route\nexport default function Page() {\n  return <h1>Hello Next.js</h1>;\n}\n// SSR, routing, bundling all included."
+      },
+      "ts": {
+        "definition": "TypeScript is a typed superset of JavaScript that compiles to plain JS. It's not a framework — it adds static types used by React, Angular and Next.js.",
+        "code": "function greet(name: string): string {\n  return `Hello ${name}`;\n}\n// Compiles to plain JS — types vanish at runtime."
+      },
+      "resources": [
+        { "label": "React docs", "url": "https://react.dev/" },
+        { "label": "Angular docs", "url": "https://angular.dev/" },
+        { "label": "Next.js docs", "url": "https://nextjs.org/docs" },
+        { "label": "TypeScript handbook", "url": "https://www.typescriptlang.org/docs/" }
+      ]
+    },
+    {
+      "id": "components",
+      "title": "Components",
+      "learn": "The building blocks of each UI approach.",
+      "react": {
+        "definition": "Components are functions returning JSX. Props flow down; state lives inside with useState/useReducer. Composition over inheritance.",
+        "code": "function Button({ label, onClick }) {\n  const [count, setCount] = useState(0);\n  return (\n    <button onClick={() => { setCount(c => c+1); onClick?.(); }}>\n      {label} ({count})\n    </button>\n  );\n}"
+      },
+      "angular": {
+        "definition": "Components combine a TypeScript class, an HTML template and CSS in one unit, wired with decorators and dependency injection.",
+        "code": "@Component({\n  selector: 'app-counter',\n  template: `<button (click)=\"inc()\">{{count}}</button>`\n})\nexport class CounterComponent {\n  count = 0;\n  inc() { this.count++; }\n}"
+      },
+      "next": {
+        "definition": "Next.js uses React components — Server Components by default (render on server, zero JS shipped) and Client Components ('use client') when interactivity is needed.",
+        "code": "// Server Component — no 'use client'\nexport default async function Users() {\n  const users = await db.users.findAll(); // server-only\n  return <ul>{users.map(u => <li key={u.id}>{u.name}</li>)}</ul>;\n}"
+      },
+      "ts": {
+        "definition": "TypeScript models components as typed interfaces/classes — props, state and component contracts become compile-time checked.",
+        "code": "interface ButtonProps {\n  label: string;\n  onClick?: () => void;\n  disabled?: boolean;\n}\n\n// React.FC<ButtonProps> gives you typed props\ntype CounterState = { count: number };"
+      },
+      "resources": [
+        { "label": "React — Components", "url": "https://react.dev/learn/your-first-component" },
+        { "label": "Angular — Components", "url": "https://angular.dev/essentials/components" },
+        { "label": "Next.js — Server Components", "url": "https://nextjs.org/docs/app/getting-started/server-and-client-components" },
+        { "label": "TS — Interfaces", "url": "https://www.typescriptlang.org/docs/handbook/2/objects.html" }
+      ]
+    },
+    {
+      "id": "state-management",
+      "title": "State Management",
+      "learn": "Where component data lives and how it updates.",
+      "react": {
+        "definition": "Local state via useState/useReducer; shared state lifted up or externalised with Context, Redux, Zustand or TanStack Query.",
+        "code": "const [count, setCount] = useState(0);\nconst [state, dispatch] = useReducer(reducer, init);\n\n// Context for global-ish state\nconst Theme = createContext('light');"
+      },
+      "angular": {
+        "definition": "Components hold state as class properties; services (singletons via DI) share state app-wide. RxJS Observables drive reactive state.",
+        "code": "@Injectable({ providedIn: 'root' })\nexport class CartService {\n  private items$ = new BehaviorSubject<Item[]>([]);\n  items = this.items$.asObservable();\n  add(i: Item) { this.items$.next([...this.items$.value, i]); }\n}"
+      },
+      "next": {
+        "definition": "Next.js splits state: server data fetched in Server Components or via React Server Actions; client UI state still uses React hooks / Context / external stores.",
+        "code": "// Server Action mutates data + revalidates\n'use server'\nexport async function addItem(formData: FormData) {\n  await db.items.create({ data: { name: formData.get('name') } });\n  revalidatePath('/cart');\n}"
+      },
+      "ts": {
+        "definition": "TypeScript types your state shape — discriminated unions model status (idle/loading/error), generics type stores and hooks.",
+        "code": "type Status = 'idle' | 'loading' | 'success' | 'error';\ntype State<T> =\n  | { status: 'idle' }\n  | { status: 'loading' }\n  | { status: 'success'; data: T }\n  | { status: 'error'; error: Error };\n\n// useState<State<User[]>>(...) — fully typed"
+      },
+      "resources": [
+        { "label": "React — Managing state", "url": "https://react.dev/learn/managing-state" },
+        { "label": "Angular — Services & DI", "url": "https://angular.dev/essentials/dependency-injection" },
+        { "label": "Next.js — Server Actions", "url": "https://nextjs.org/docs/app/getting-started/mutating-data" },
+        { "label": "TS — Generics", "url": "https://www.typescriptlang.org/docs/handbook/2/generics.html" }
+      ]
+    },
+    {
+      "id": "routing",
+      "title": "Routing & Navigation",
+      "learn": "Mapping URLs to views.",
+      "react": {
+        "definition": "React has no built-in router — React Router is the standard: declarative <Route> components, nested routes, loaders and navigation hooks.",
+        "code": "import { Routes, Route, Link } from 'react-router-dom';\n\n<Routes>\n  <Route path=\"/\" element={<Home/>} />\n  <Route path=\"/users/:id\" element={<User/>} />\n</Routes>\n\n<Link to=\"/users/1\">Profile</Link>"
+      },
+      "angular": {
+        "definition": "Angular ships @angular/router — route configs with lazy loading, guards, resolvers and child routes configured in TypeScript.",
+        "code": "const routes: Routes = [\n  { path: 'users/:id', component: UserComponent,\n    canActivate: [AuthGuard] },\n  { path: '**', redirectTo: '' }\n];\n\n// <router-outlet></router-outlet> in template"
+      },
+      "next": {
+        "definition": "Next.js uses file-system routing: folders under app/ become routes, dynamic segments use [param], and layouts nest automatically.",
+        "code": "app/\n├── page.tsx          → /\n├── users/\n│   ├── page.tsx      → /users\n│   └── [id]/\n│       └── page.tsx  → /users/:id\n└── layout.tsx       → wraps all pages"
+      },
+      "ts": {
+        "definition": "TypeScript types route params and search params — Next.js generates typed helpers; React Router/Angular params get explicit types.",
+        "code": "// Next.js typed params (v15+)\nexport default async function Page({\n  params\n}: {\n  params: Promise<{ id: string }>;\n}) {\n  const { id } = await params;\n  return <p>User {id}</p>;\n}"
+      },
+      "resources": [
+        { "label": "React Router", "url": "https://reactrouter.com/" },
+        { "label": "Angular Router", "url": "https://angular.dev/guide/routing" },
+        { "label": "Next.js — Routing", "url": "https://nextjs.org/docs/app/getting-started/routing-and-navigation" },
+        { "label": "TS — Type utilities", "url": "https://www.typescriptlang.org/docs/handbook/utility-types.html" }
+      ]
+    },
+    {
+      "id": "data-fetching",
+      "title": "Data Fetching",
+      "learn": "Getting server data into the UI.",
+      "react": {
+        "definition": "React fetches via useEffect + fetch/axios, or libraries like TanStack Query (caching, retries, loading states) — all client-side after mount.",
+        "code": "const { data, isLoading } = useQuery({\n  queryKey: ['users'],\n  queryFn: () => fetch('/api/users').then(r => r.json())\n});\n\n// renders loading → data states"
+      },
+      "angular": {
+        "definition": "Angular's HttpClient returns Observables; the async pipe in templates subscribes automatically, and interceptors add auth headers globally.",
+        "code": "// service\nusers$ = this.http.get<User[]>('/api/users');\n\n// template — auto subscribe/unsubscribe\n<ul *ngFor=\"let u of users$ | async\">{{ u.name }}</ul>"
+      },
+      "next": {
+        "definition": "Next.js fetches on the server: async Server Components await data directly (cached by default), plus revalidation strategies and Route Handlers for APIs.",
+        "code": "// Server Component — fetch on server, send HTML\nasync function Page() {\n  const res = await fetch('https://api.example.com/users', {\n    next: { revalidate: 60 } // ISR: revalidate every 60s\n  });\n  const users = await res.json();\n  return <UserList users={users} />;\n}"
+      },
+      "ts": {
+        "definition": "TypeScript types the API boundary — response shapes become interfaces, fetch wrappers return typed Promises, generics parameterise queries.",
+        "code": "interface User { id: number; name: string; email: string }\n\nasync function getUsers(): Promise<User[]> {\n  const res = await fetch('/api/users');\n  return res.json(); // typed as User[]\n}\n\n// No more guessing response shapes."
+      },
+      "resources": [
+        { "label": "TanStack Query", "url": "https://tanstack.com/query/latest" },
+        { "label": "Angular HttpClient", "url": "https://angular.dev/guide/http" },
+        { "label": "Next.js — Fetching data", "url": "https://nextjs.org/docs/app/getting-started/fetching-data" },
+        { "label": "TS — Fetch & Promises", "url": "https://www.typescriptlang.org/docs/handbook/promises.html" }
+      ]
+    },
+    {
+      "id": "styling",
+      "title": "Styling & UI",
+      "learn": "How each approach handles CSS.",
+      "react": {
+        "definition": "React is styling-agnostic: CSS modules, styled-components, Tailwind, or plain CSS — you pick. CSS-in-JS libs colocate styles with components.",
+        "code": "// Tailwind with React\n<button className=\"px-4 py-2 bg-blue-600 rounded-lg\">\n  Click\n</button>\n\n// or CSS modules: import styles from './Button.module.css'"
+      },
+      "angular": {
+        "definition": "Angular components have encapsulated styles by default (scoped per component), plus global styles, Sass support and Angular Material components.",
+        "code": "@Component({\n  selector: 'app-btn',\n  template: '<button class=\"primary\">Go</button>',\n  styles: [`.primary { background: #3f51b5; color: white; }`]\n  // ^ only applies inside this component\n})\nexport class BtnComponent {}"
+      },
+      "next": {
+        "definition": "Next.js supports all CSS options plus built-in CSS Modules, Sass, Tailwind and styled-jsx — styles are optimised and scoped automatically.",
+        "code": "// app/page.module.css\n.title { color: rebeccapurple; }\n\n// app/page.tsx\nimport styles from './page.module.css';\n<h1 className={styles.title}>Hi</h1>\n\n// styled-jsx also built in"
+      },
+      "ts": {
+        "definition": "TypeScript doesn't style anything itself — but typed CSS-in-JS libs (styled-components, vanilla-extract) give type-safe style props and tokens.",
+        "code": "// vanilla-extract — type-safe atomic CSS\nimport { style } from '@vanilla-extract/css';\n\nexport const button = style({\n  background: '#3b82f6',\n  padding: '8px 16px',\n  borderRadius: 8,\n});\n// className={button} — fully typed"
+      },
+      "resources": [
+        { "label": "React — Styling", "url": "https://react.dev/learn/reacting-to-input" },
+        { "label": "Angular — Styling", "url": "https://angular.dev/guide/styling" },
+        { "label": "Next.js — CSS", "url": "https://nextjs.org/docs/app/getting-started/css" },
+        { "label": "vanilla-extract", "url": "https://vanilla-extract.style/" }
+      ]
+    },
+    {
+      "id": "typescript-usage",
+      "title": "TypeScript in Each",
+      "learn": "How each ecosystem uses (or doesn't use) types.",
+      "react": {
+        "definition": "React itself ships plain JS but is written with TypeScript types — most projects use .tsx with typed props, hooks and events for safety.",
+        "code": "type Props = { items: string[]; onSelect: (id: number) => void };\n\nfunction List({ items, onSelect }: Props) {\n  return items.map((s, i) => (\n    <button key={i} onClick={() => onSelect(i)}>{s}</button>\n  ));\n}"
+      },
+      "angular": {
+        "definition": "Angular is TypeScript-first — decorators, DI and templates all assume typed classes. Write Angular without TS and you lose most of its power.",
+        "code": "@Component({ selector: 'app-user', template: '{{ user.name }}' })\nexport class UserComponent {\n  @Input() user!: User;          // typed input\n  @Output() saved = new EventEmitter<User>();\n}"
+      },
+      "next": {
+        "definition": "Next.js is TypeScript-first too — app router, server actions and API routes all have first-class typed APIs with generated route types.",
+        "code": "// typed route handler\nexport async function GET(req: Request) {\n  const { searchParams } = new URL(req.url);\n  const q = searchParams.get('q') ?? '';\n  return Response.json(await search(q));\n}\n\n// typed server action params via zod/TS"
+      },
+      "ts": {
+        "definition": "TypeScript adds: interfaces & type aliases, generics, union/literal types, type narrowing, enums, decorators (Angular) and compile-time guarantees JS lacks.",
+        "code": "type Role = 'admin' | 'user' | 'guest';\n\nfunction canDelete(role: Role): boolean {\n  return role === 'admin'; // narrowed union\n}\n\n// Compile error caught before runtime:\n// canDelete('superuser') ← TS2345"
+      },
+      "resources": [
+        { "label": "React + TypeScript", "url": "https://react.dev/learn/typescript" },
+        { "label": "Angular + TypeScript", "url": "https://angular.dev/essentials/typescript" },
+        { "label": "Next.js + TypeScript", "url": "https://nextjs.org/docs/app/api-reference/config/typescript" },
+        { "label": "TS — Handbook", "url": "https://www.typescriptlang.org/docs/handbook/intro.html" }
+      ]
+    },
+    {
+      "id": "ecosystem-tooling",
+      "title": "Ecosystem & Tooling",
+      "learn": "Community, jobs and supporting tools.",
+      "react": {
+        "definition": "Huge ecosystem: React Native (mobile), thousands of libs, most job postings ask for it. Freedom means more decisions — router, state, styling, testing.",
+        "code": "// Freedom = choices\n// router: react-router | tanstack-router\n// state: redux | zustand | jotai\n// styling: tailwind | css-modules | mui\n// data: react-query | swr | rtk-query"
+      },
+      "angular": {
+        "definition": "Batteries included: CLI scaffolds everything, Material UI official, RxJS integrated, strong typing throughout. Fewer choices, more consistency, steeper curve.",
+        "code": "ng new my-app        // CLI generates everything\nng generate component user\nng add @angular/material\n\n// opinionated = consistent teams, faster onboarding"
+      },
+      "next": {
+        "definition": "Next.js by Vercel is the default React framework for production — SSR/SSG, edge runtime, image optimisation, analytics. Backed by a company, huge adoption.",
+        "code": "npx create-next-app@latest\n\n// you get:\n// ✓ SSR/SSG/ISR\n// ✓ file routing\n// ✓ image optimisation\n// ✓ API routes\n// ✓ TypeScript"
+      },
+      "ts": {
+        "definition": "TypeScript is the industry's typed-JS standard — used by Angular (required), Next.js (first-class), React (de facto), Node.js backends and tooling.",
+        "code": "// tsconfig.json\n{\n  \"compilerOptions\": {\n    \"strict\": true,        // catch more bugs\n    \"target\": \"ES2020\",\n    \"jsx\": \"react-jsx\"\n  }\n}\n\n// tsc → JS, or ts-node for dev"
+      },
+      "resources": [
+        { "label": "React ecosystem", "url": "https://react.dev/community" },
+        { "label": "Angular CLI", "url": "https://angular.dev/tools/cli" },
+        { "label": "Next.js — Docs", "url": "https://nextjs.org/docs" },
+        { "label": "TS — tsconfig", "url": "https://www.typescriptlang.org/tsconfig" }
+      ]
+    }
+  ]
+}

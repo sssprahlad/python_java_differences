@@ -1,0 +1,213 @@
+{
+  "section": {
+    "id": "backend-3way",
+    "title": "Node.js vs Django vs Spring Boot — Backend Frameworks",
+    "subtitle": "Three ways to build a backend: Express, Django and Spring Boot compared on structure, routing, ORM, APIs, auth and deployment.",
+    "color": "#68a063"
+  },
+  "columns": [
+    { "key": "node", "label": "Node.js (Express)", "color": "#68a063" },
+    { "key": "django", "label": "Django", "color": "#0c4b33" },
+    { "key": "java", "label": "Spring Boot (Java)", "color": "#6db33f" }
+  ],
+  "topics": [
+    {
+      "id": "framework-style",
+      "title": "Framework Style",
+      "learn": "Unopinionated vs batteries-included vs enterprise.",
+      "node": {
+        "definition": "Express is minimalist and unopinionated — you assemble the stack yourself (ORM, auth, validation via middleware). JavaScript everywhere: same language on client and server.",
+        "code": "const express = require('express');\nconst app = express();\napp.use(express.json());\napp.listen(3000);\n// You choose: mongoose, prisma, passport…"
+      },
+      "django": {
+        "definition": "Django is batteries-included and convention-driven (\"batteries included\"). ORM, admin panel, auth, forms and templating ship in the box — less assembly required.",
+        "code": "# django-admin startproject mysite\n# python manage.py startapp polls\n# ORM, admin, auth, migrations all built-in"
+      },
+      "java": {
+        "definition": "Spring Boot is enterprise-grade with convention over configuration. It autoconfigures beans, embeds Tomcat, and offers Spring Data, Security and a huge ecosystem.",
+        "code": "// start via Spring Initializr\n@SpringBootApplication\npublic class App {\n  public static void main(String[] a) {\n    SpringApplication.run(App.class, a);\n  }\n}"
+      },
+      "resources": [
+        { "label": "Express docs", "url": "https://expressjs.com/" },
+        { "label": "Django docs", "url": "https://docs.djangoproject.com/" },
+        { "label": "Spring Boot docs", "url": "https://spring.io/projects/spring-boot" }
+      ]
+    },
+    {
+      "id": "project-structure",
+      "title": "Project Structure",
+      "learn": "How each framework organises files.",
+      "node": {
+        "definition": "Express has no enforced structure — typically routes/, models/, middleware/ folders that you design yourself.",
+        "code": "myapp/\n├── server.js\n├── routes/\n│   └── users.js\n├── models/\n│   └── user.js\n└── package.json"
+      },
+      "django": {
+        "definition": "Django splits projects into apps, each with models.py, views.py, urls.py, admin.py, migrations/ — a fixed, predictable layout.",
+        "code": "mysite/\n├── manage.py\n├── mysite/        # project settings\n└── polls/         # app\n    ├── models.py\n    ├── views.py\n    ├── urls.py\n    └── migrations/"
+      },
+      "java": {
+        "definition": "Spring Boot uses Maven/Gradle with src/main/java packages organised by layer (controller, service, repository, model) or by feature.",
+        "code": "src/main/java/com/example/app/\n├── controller/  # REST endpoints\n├── service/     # business logic\n├── repository/  # DB access\n├── model/       # entities\n└── App.java     # @SpringBootApplication\n\npom.xml          # dependencies"
+      },
+      "resources": [
+        { "label": "Express — app structure", "url": "https://expressjs.com/en/starter/hello-world.html" },
+        { "label": "Django — projects & apps", "url": "https://docs.djangoproject.com/en/stable/intro/tutorial01/" },
+        { "label": "Spring — project structure", "url": "https://spring.io/guides/gs/rest-service/" }
+      ]
+    },
+    {
+      "id": "routing-urls",
+      "title": "Routing & URLs",
+      "learn": "Mapping URLs to handlers.",
+      "node": {
+        "definition": "Express routes match HTTP method + path and call a handler function. Router modules keep routes organised.",
+        "code": "const express = require('express');\nconst router = express.Router();\n\nrouter.get('/users/:id', (req, res) => {\n  res.json({ id: req.params.id });\n});\nrouter.post('/users', createUser);\n\napp.use('/api', router);"
+      },
+      "django": {
+        "definition": "Django uses urls.py with path()/re_path() mapping URL patterns to view functions or class-based views.",
+        "code": "# polls/urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path('polls/<int:question_id>/', views.detail),\n    path('polls/', views.index),\n]"
+      },
+      "java": {
+        "definition": "Spring uses @RestController with annotations like @GetMapping/@PostMapping on methods; paths support path variables and request params.",
+        "code": "@RestController\n@RequestMapping(\"/api/users\")\npublic class UserController {\n\n  @GetMapping(\"/{id}\")\n  public User get(@PathVariable Long id) { ... }\n\n  @PostMapping\n  public User create(@RequestBody User u) { ... }\n}"
+      },
+      "resources": [
+        { "label": "Express — Routing", "url": "https://expressjs.com/en/guide/routing.html" },
+        { "label": "Django — URL dispatcher", "url": "https://docs.djangoproject.com/en/stable/topics/http/urls/" },
+        { "label": "Spring — Web annotations", "url": "https://spring.io/guides/gs/rest-service/" }
+      ]
+    },
+    {
+      "id": "database-orm",
+      "title": "Database & ORM",
+      "learn": "How each talks to the database.",
+      "node": {
+        "definition": "Node has no built-in ORM — you pick one: Sequelize, TypeORM, Prisma or Mongoose (MongoDB). Queries are often written in the ORM's own syntax.",
+        "code": "// Prisma example\nconst user = await prisma.user.findUnique({\n  where: { id: 1 }\n});\n\n// Raw SQL also possible via pg/mysql2 drivers"
+      },
+      "django": {
+        "definition": "Django ships its own ORM — models are Python classes, queries look like Python, and migrations are auto-generated from model changes.",
+        "code": "# models.py\nclass Question(models.Model):\n    question_text = models.CharField(max_length=200)\n    pub_date = models.DateTimeField()\n\n# query in views.py\nlatest = Question.objects.filter(\n    pub_date__year=2024\n).order_by('-pub_date')[:5]"
+      },
+      "java": {
+        "definition": "Spring Data JPA maps Java entities to tables via annotations. Repository interfaces give you CRUD queries for free; JPQL/HQL for complex ones.",
+        "code": "@Entity\npublic class User {\n  @Id @GeneratedValue Long id;\n  String name;\n}\n\npublic interface UserRepo\n    extends JpaRepository<User, Long> {\n  List<User> findByName(String name); // auto-implemented\n}"
+      },
+      "resources": [
+        { "label": "Prisma docs", "url": "https://www.prisma.io/docs" },
+        { "label": "Django ORM", "url": "https://docs.djangoproject.com/en/stable/topics/db/" },
+        { "label": "Spring Data JPA", "url": "https://spring.io/projects/spring-data-jpa" }
+      ]
+    },
+    {
+      "id": "templates-views",
+      "title": "Templates & Server Rendering",
+      "learn": "Rendering HTML on the server.",
+      "node": {
+        "definition": "Express doesn't ship a template engine — you add EJS, Pug or Handlebars, or go full SPA with a separate React/Vue frontend and JSON APIs.",
+        "code": "app.set('view engine', 'ejs');\nres.render('profile', { user });\n\n// Or serve a SPA:\napp.use(express.static('public'));"
+      },
+      "django": {
+        "definition": "Django Templates is built in — HTML files with {{ variables }}, {% tags %} for logic, inheritance via {% extends %}, and automatic XSS escaping.",
+        "code": "<!-- templates/polls/detail.html -->\n{% extends \"base.html\" %}\n{% block content %}\n  <h1>{{ question.question_text }}</h1>\n  {% for choice in question.choice_set.all %}\n    <p>{{ choice.choice_text }}</p>\n  {% endfor %}\n{% endblock %}"
+      },
+      "java": {
+        "definition": "Spring offers Thymeleaf (server-side HTML), or you return JSON from @RestController and let a SPA handle the UI — the modern default.",
+        "code": "@Controller\npublic class PageController {\n  @GetMapping(\"/users\")\n  public String users(Model model) {\n    model.addAttribute(\"users\", repo.findAll());\n    return \"users\"; // -> templates/users.html (Thymeleaf)\n  }\n}"
+      },
+      "resources": [
+        { "label": "EJS docs", "url": "https://ejs.co/" },
+        { "label": "Django Templates", "url": "https://docs.djangoproject.com/en/stable/topics/templates/" },
+        { "label": "Thymeleaf", "url": "https://www.thymeleaf.org/" }
+      ]
+    },
+    {
+      "id": "auth-users",
+      "title": "Authentication & Users",
+      "learn": "Login, sessions and permissions.",
+      "node": {
+        "definition": "Express has no built-in auth — you wire Passport.js, JWT (jsonwebtoken) or Auth0. Sessions need middleware like express-session.",
+        "code": "// JWT sign/verify\nconst jwt = require('jsonwebtoken');\nconst token = jwt.sign({ userId: 1 }, SECRET);\n\n// verify in middleware\nconst payload = jwt.verify(token, SECRET);"
+      },
+      "django": {
+        "definition": "Django ships full auth: User model, login/logout views, session auth, password hashing, decorators like @login_required and groups/permissions.",
+        "code": "from django.contrib.auth.decorators import login_required\n\n@login_required\ndef dashboard(request):\n    return render(request, 'dashboard.html')\n\n# authenticate\nuser = authenticate(username=u, password=p)"
+      },
+      "java": {
+        "definition": "Spring Security provides auth via config: form login, HTTP Basic, OAuth2 and JWT filters — configured mostly with a SecurityFilterChain bean.",
+        "code": "@Configuration\n@EnableWebSecurity\npublic class SecConfig {\n  @Bean SecurityFilterChain chain(HttpSecurity http) {\n    return http.authorizeHttpRequests(a ->\n      a.requestMatchers(\"/api/**\").authenticated()\n       .anyRequest().permitAll())\n      .httpBasic(Customizer.withDefaults())\n      .build();\n  }\n}"
+      },
+      "resources": [
+        { "label": "Passport.js", "url": "https://www.passportjs.org/" },
+        { "label": "Django auth", "url": "https://docs.djangoproject.com/en/stable/topics/auth/" },
+        { "label": "Spring Security", "url": "https://spring.io/projects/spring-security" }
+      ]
+    },
+    {
+      "id": "rest-api",
+      "title": "REST APIs & JSON",
+      "learn": "Building JSON endpoints.",
+      "node": {
+        "definition": "Express handlers read req.body/req.params and return res.json() — JSON APIs are the natural fit since JS objects map 1:1 to JSON.",
+        "code": "app.get('/api/users/:id', async (req, res) => {\n  const user = await User.findById(req.params.id);\n  if (!user) return res.status(404).json({ error: 'not found' });\n  res.json(user);\n});\n\napp.post('/api/users', async (req, res) => {\n  const u = await User.create(req.body);\n  res.status(201).json(u);\n});"
+      },
+      "django": {
+        "definition": "Django views return JsonResponse or use Django REST Framework (DRF) for serializers, viewsets and routers — the standard for serious APIs.",
+        "code": "# DRF serializer + viewset\nclass UserSerializer(serializers.ModelSerializer):\n    class Meta:\n        model = User\n        fields = ['id', 'username', 'email']\n\nclass UserViewSet(viewsets.ModelViewSet):\n    queryset = User.objects.all()\n    serializer_class = UserSerializer"
+      },
+      "java": {
+        "definition": "Spring @RestController returns objects serialized to JSON automatically (Jackson). @RequestBody deserializes request JSON into Java objects.",
+        "code": "@RestController\n@RequestMapping(\"/api/users\")\npublic class UserApi {\n\n  @GetMapping(\"/{id}\")\n  public ResponseEntity<User> get(@PathVariable Long id) {\n    return repo.findById(id)\n      .map(ResponseEntity::ok)\n      .orElse(ResponseEntity.notFound().build());\n  }\n}"
+      },
+      "resources": [
+        { "label": "Express — res.json", "url": "https://expressjs.com/en/4x/api.html#res.json" },
+        { "label": "Django REST Framework", "url": "https://www.django-rest-framework.org/" },
+        { "label": "Spring — Building REST services", "url": "https://spring.io/guides/gs/rest-service/" }
+      ]
+    },
+    {
+      "id": "middleware-pipeline",
+      "title": "Middleware & Request Pipeline",
+      "learn": "Code that runs on every request.",
+      "node": {
+        "definition": "Express middleware are functions (req, res, next) executed in order — used for logging, body parsing, CORS, auth. Order matters.",
+        "code": "app.use((req, res, next) => {\n  console.log(`${req.method} ${req.url}`);\n  next(); // pass to next middleware\n});\n\napp.use(express.json()); // parse body\napp.use('/admin', requireAuth); // protect routes"
+      },
+      "django": {
+        "definition": "Django middleware is a list of classes in settings.MIDDLEWARE processing request/response — plus decorators (@login_required) and DRF permission classes.",
+        "code": "# settings.py\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    # ...\n]\n\n# or per-view\n@permission_classes([IsAuthenticated])"
+      },
+      "java": {
+        "definition": "Spring uses servlet Filters and HandlerInterceptors plus AOP aspects — cross-cutting concerns like logging, auth and CORS are configured centrally.",
+        "code": "@Component\npublic class LogFilter extends OncePerRequestFilter {\n  @Override\n  protected void doFilterInternal(HttpServletRequest req,\n      HttpServletResponse res, FilterChain chain) {\n    System.out.println(req.getMethod() + \" \" + req.getRequestURI());\n    chain.doFilter(req, res);\n  }\n}\n\n// CORS: @CrossOrigin or WebMvcConfigurer"
+      },
+      "resources": [
+        { "label": "Express — Middleware", "url": "https://expressjs.com/en/guide/using-middleware.html" },
+        { "label": "Django — Middleware", "url": "https://docs.djangoproject.com/en/stable/topics/http/middleware/" },
+        { "label": "Spring — Filters & Interceptors", "url": "https://spring.io/guides/gs/serving-web-content/" }
+      ]
+    },
+    {
+      "id": "testing-deployment",
+      "title": "Testing & Deployment",
+      "learn": "How each is tested and shipped.",
+      "node": {
+        "definition": "Jest/Mocha + Supertest for unit/integration tests. Deploy as a Node process on any host — Docker, PM2, Vercel, AWS — one language end-to-end.",
+        "code": "// jest test\ntest('GET /api/users', async () => {\n  const res = await request(app).get('/api/users');\n  expect(res.status).toBe(200);\n});\n\n// deploy: docker build -t api . && docker run -p 3000:3000 api"
+      },
+      "django": {
+        "definition": "Django's test runner + unittest/pytest. Deploy via gunicorn + nginx, or platforms like Heroku/Railway; settings split dev/prod.",
+        "code": "# tests.py\nfrom django.test import TestCase\n\nclass PollTests(TestCase):\n    def test_index(self):\n        r = self.client.get('/polls/')\n        self.assertEqual(r.status_code, 200)\n\n# deploy: gunicorn mysite.wsgi --bind 0.0.0.0:8000"
+      },
+      "java": {
+        "definition": "JUnit 5 + Spring Boot Test + MockMvc for tests. Deploy as a fat JAR (java -jar) to any JVM host, or containers via Docker/Jib.",
+        "code": "@SpringBootTest\n@AutoConfigureMockMvc\nclass UserApiTest {\n  @Test void getUser() throws Exception {\n    mockMvc.perform(get(\"/api/users/1\"))\n      .andExpect(status().isOk());\n  }\n}\n\n// deploy: java -jar app.jar"
+      },
+      "resources": [
+        { "label": "Jest", "url": "https://jestjs.io/" },
+        { "label": "Django testing", "url": "https://docs.djangoproject.com/en/stable/topics/testing/" },
+        { "label": "Spring Boot testing", "url": "https://spring.io/guides/gs/testing-web/" }
+      ]
+    }
+  ]
+}

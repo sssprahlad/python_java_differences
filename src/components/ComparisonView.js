@@ -1,54 +1,51 @@
 import React from 'react';
 import CodeBlock from './CodeBlock';
 
-function ComparisonView({ topic, leftLabel, rightLabel, leftColor, rightColor, onRunInPlayground, section, onOpenTopic, onBack, selectedSection }) {
-
-  const handleBack = () => {
-    // onOpenTopic(section, topic);
-    onBack();
-  };
-
+function ComparisonView({ topic, onRunInPlayground, section, onBack, selectedSection }) {
+  const columns = section.columns || [];
+  const backTitle = selectedSection?.title || section.section?.title || 'section';
 
   return (
     <article className="comparison-view">
       <header className="topic-header">
         <h2>{topic.title}</h2>
         <p className="topic-learn">🎯 {topic.learn}</p>
-        <button style={{ marginTop: '1rem', padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: '#007bff', color: 'white', cursor: 'pointer' }} onClick={() => handleBack()}>
-          Back to <strong>{selectedSection?.title}</strong>
+        <button
+          className="back-btn"
+          style={{ marginTop: '1rem' }}
+          onClick={onBack}
+        >
+          ← Back to <strong>{backTitle}</strong>
         </button>
       </header>
 
       <div className="compare-columns">
-        <section className="compare-col" style={{ '--accent': leftColor }}>
-          <div className="col-heading">
-            <span className="lang-badge" style={{ background: leftColor }}>{leftLabel}</span>
-          </div>
-          <p className="col-definition">{topic.python.definition}</p>
-          <CodeBlock
-            code={topic.python.code}
-            language={leftLabel}
-            onRunInPlayground={(code) => onRunInPlayground(code, leftLabel)}
-          />
-        </section>
-
-        <div className="compare-divider" aria-hidden="true">
-          <span className="divider-line" />
-          <span className="divider-badge">VS</span>
-          <span className="divider-line" />
-        </div>
-
-        <section className="compare-col" style={{ '--accent': rightColor }}>
-          <div className="col-heading">
-            <span className="lang-badge" style={{ background: rightColor }}>{rightLabel}</span>
-          </div>
-          <p className="col-definition">{topic.java.definition}</p>
-          <CodeBlock
-            code={topic.java.code}
-            language={rightLabel}
-            onRunInPlayground={(code) => onRunInPlayground(code, rightLabel)}
-          />
-        </section>
+        {columns.map((col, i) => {
+          const content = topic[col.key];
+          if (!content) return null;
+          return (
+            <React.Fragment key={col.key}>
+              {i > 0 && (
+                <div className="compare-divider" aria-hidden="true">
+                  <span className="divider-line" />
+                  <span className="divider-badge">VS</span>
+                  <span className="divider-line" />
+                </div>
+              )}
+              <section className="compare-col" style={{ '--accent': col.color }}>
+                <div className="col-heading">
+                  <span className="lang-badge" style={{ background: col.color }}>{col.label}</span>
+                </div>
+                <p className="col-definition">{content.definition}</p>
+                <CodeBlock
+                  code={content.code}
+                  language={col.label}
+                  onRunInPlayground={(code) => onRunInPlayground(code, col.label)}
+                />
+              </section>
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {topic.resources && topic.resources.length > 0 && (

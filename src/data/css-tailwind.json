@@ -1,0 +1,116 @@
+{
+  "section": {
+    "id": "css-tailwind",
+    "title": "CSS vs Tailwind CSS — Styling Approaches",
+    "subtitle": "Hand-written stylesheets vs utility-first classes — how each approach styles modern UIs.",
+    "color": "#38bdf8"
+  },
+  "columns": [
+    { "key": "css", "label": "CSS", "color": "#264de4" },
+    { "key": "tailwind", "label": "Tailwind CSS", "color": "#06b6d4" }
+  ],
+  "topics": [
+    {
+      "id": "core-approach",
+      "title": "Core Approach",
+      "learn": "The fundamental philosophy difference.",
+      "css": {
+        "definition": "CSS is a declarative styling language — you write rules in .css files that target elements by selector, then apply classes or ids in HTML.",
+        "code": "/* styles.css */\n.card {\n  background: #fff;\n  border-radius: 12px;\n  padding: 20px;\n}\n\n/* HTML */\n<div class=\"card\">Hello</div>"
+      },
+      "tailwind": {
+        "definition": "Tailwind is utility-first — instead of writing CSS, you compose styles from hundreds of small utility classes directly in your HTML/JSX.",
+        "code": "<!-- No .css file needed -->\n<div class=\"bg-white rounded-xl p-5 shadow\">\n  Hello\n</div>\n\n/* Compiles to minimal CSS — only classes you use -->"
+      },
+      "resources": [
+        { "label": "CSS — MDN", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS" },
+        { "label": "Tailwind — Docs", "url": "https://tailwindcss.com/docs" }
+      ]
+    },
+    {
+      "id": "layout-flexbox",
+      "title": "Layout with Flexbox",
+      "learn": "Building rows and columns.",
+      "css": {
+        "definition": "You write a flex container rule in CSS and control direction, gap and alignment with properties like display:flex, justify-content and gap.",
+        "code": ".row {\n  display: flex;\n  gap: 16px;\n  justify-content: space-between;\n  align-items: center;\n}\n\n/* HTML */\n<div class=\"row\">\n  <div>Left</div><div>Right</div>\n</div>"
+      },
+      "tailwind": {
+        "definition": "The same flexbox properties exist as utilities — flex, flex-row, justify-between, items-center, gap-4 — applied straight in markup.",
+        "code": "<div class=\"flex gap-4 justify-between items-center\">\n  <div>Left</div>\n  <div>Right</div>\n</div>\n\n/* gap-4 = 1rem, justify-between, items-center */"
+      },
+      "resources": [
+        { "label": "CSS — Flexbox", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout" },
+        { "label": "Tailwind — Flexbox", "url": "https://tailwindcss.com/docs/flex" }
+      ]
+    },
+    {
+      "id": "spacing-colors",
+      "title": "Spacing, Colors & Sizing",
+      "learn": "Padding, margins, colors and dimensions.",
+      "css": {
+        "definition": "You define arbitrary values in CSS: padding: 16px, margin-top: 8px, color: #3b82f6, background: linear-gradient(...). Custom properties (--vars) help reuse values.",
+        "code": ".btn {\n  padding: 10px 20px;\n  margin-top: 12px;\n  background: #3b82f6;\n  color: #fff;\n  border-radius: 8px;\n}\n\n:root { --brand: #3b82f6; }\n.btn-primary { background: var(--brand); }"
+      },
+      "tailwind": {
+        "definition": "Spacing uses a 4px scale (p-4 = 1rem), colors are named shades (bg-blue-500), and sizes map to the same scale — no custom values needed for 95% of cases.",
+        "code": "<button class=\"px-5 py-2.5 mt-3 bg-blue-500\n  text-white rounded-lg hover:bg-blue-600\">\n  Click\n</button>\n\n/* px-5 = 1.25rem, py-2.5, mt-3, rounded-lg */"
+      },
+      "resources": [
+        { "label": "CSS — Custom properties", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties" },
+        { "label": "Tailwind — Spacing scale", "url": "https://tailwindcss.com/docs/customizing-spacing" }
+      ]
+    },
+    {
+      "id": "responsive-design",
+      "title": "Responsive Design",
+      "learn": "Adapting layouts to screen sizes.",
+      "css": {
+        "definition": "Media queries in CSS flip styles at breakpoints — you write separate rules inside @media blocks for mobile/tablet/desktop.",
+        "code": ".grid {\n  display: grid;\n  grid-template-columns: 1fr;\n}\n\n@media (min-width: 768px) {\n  .grid { grid-template-columns: repeat(3, 1fr); }\n}\n\n@media (min-width: 1024px) {\n  .grid { grid-template-columns: repeat(4, 1fr); }\n}"
+      },
+      "tailwind": {
+        "definition": "Breakpoints are prefixes on utilities — sm:, md:, lg:, xl: — so responsiveness lives inline in the same class attribute.",
+        "code": "<div class=\"grid grid-cols-1\n  md:grid-cols-3 lg:grid-cols-4 gap-4\">\n  ...\n</div>\n\n/* md: applies ≥768px, lg: ≥1024px */"
+      },
+      "resources": [
+        { "label": "CSS — Media queries", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries" },
+        { "label": "Tailwind — Responsive design", "url": "https://tailwindcss.com/docs/responsive-design" }
+      ]
+    },
+    {
+      "id": "customization",
+      "title": "Customization & Theming",
+      "learn": "Making the styles yours.",
+      "css": {
+        "definition": "Full freedom — any value, any selector, any pseudo-class. Custom properties (CSS variables) enable theming; preprocessors like Sass add loops and mixins.",
+        "code": ":root {\n  --primary: #6366f1;\n  --radius: 12px;\n}\n\n[data-theme='dark'] {\n  --primary: #818cf8;\n}\n\n.btn {\n  background: var(--primary);\n  border-radius: var(--radius);\n}"
+      },
+      "tailwind": {
+        "definition": "Extend via tailwind.config.js — add custom colors, spacing, fonts, breakpoints. The JIT compiler only emits CSS for classes you actually use.",
+        "code": "// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: { brand: '#6366f1' },\n      borderRadius: { xl2: '16px' }\n    }\n  }\n}\n\n// then use: bg-brand rounded-xl2"
+      },
+      "resources": [
+        { "label": "CSS — Variables & theming", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_cascading_variables" },
+        { "label": "Tailwind — Configuration", "url": "https://tailwindcss.com/docs/configuration" }
+      ]
+    },
+    {
+      "id": "when-to-use",
+      "title": "When to Use Which",
+      "learn": "Choosing the right tool for the job.",
+      "css": {
+        "definition": "Plain CSS wins for unique one-off designs, tiny sites, email templates, and when you need pixel-perfect control or exotic effects (animations, blend modes, clip-path).",
+        "code": "/* Great for: */\n/* - custom animations & keyframes */\n/* - complex selectors (:nth-child, ::before) */\n/* - print styles, email HTML */\n/* - design systems needing total control */\n\n@keyframes fadeIn {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}"
+      },
+      "tailwind": {
+        "definition": "Tailwind wins for rapid UI development, consistent design systems, React/Vue/Next projects, and teams that want styling colocation without naming-paralysis.",
+        "code": "<!-- Great for: -->\n<!-- - dashboards & admin panels -->\n<!-- - SaaS products & landing pages -->\n<!-- - design-system consistency -->\n<!-- - fast iteration without context-switching -->\n\n<div class=\"flex items-center gap-3 p-4\n  bg-white dark:bg-slate-800 rounded-xl\">\n  ...\n</div>"
+      },
+      "resources": [
+        { "label": "Tailwind — Why Tailwind?", "url": "https://tailwindcss.com/docs/utility-first" },
+        { "label": "CSS-Tricks — A Complete Guide", "url": "https://css-tricks.com/guides/" }
+      ]
+    }
+  ]
+}

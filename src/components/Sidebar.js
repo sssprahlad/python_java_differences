@@ -1,5 +1,14 @@
 import React from 'react';
 
+function topicHaystack(section, topic) {
+  let text = `${topic.title} ${topic.learn}`.toLowerCase();
+  (section.columns || []).forEach((col) => {
+    const c = topic[col.key];
+    if (c) text += ` ${col.label} ${c.definition} ${c.code}`.toLowerCase();
+  });
+  return text;
+}
+
 function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopic, onSelectSection }) {
   const q = query.trim().toLowerCase();
 
@@ -7,13 +16,7 @@ function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopi
     <nav className="sidebar">
       {sections.map((section) => {
         const filteredTopics = q
-          ? section.topics.filter(
-              (t) =>
-                t.title.toLowerCase().includes(q) ||
-                t.learn.toLowerCase().includes(q) ||
-                (t.python.definition + t.python.code).toLowerCase().includes(q) ||
-                (t.java.definition + t.java.code).toLowerCase().includes(q)
-            )
+          ? section.topics.filter((t) => topicHaystack(section, t).includes(q))
           : section.topics;
 
         if (q && filteredTopics.length === 0) return null;
@@ -42,12 +45,9 @@ function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopi
           </div>
         );
       })}
-      {q && sections.every((s) => s.topics.filter((t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.learn.toLowerCase().includes(q) ||
-        (t.python.definition + t.python.code).toLowerCase().includes(q) ||
-        (t.java.definition + t.java.code).toLowerCase().includes(q)
-      ).length === 0) && <p className="no-results">No topics match “{query}”.</p>}
+      {q && sections.every((s) => s.topics.every((t) => !topicHaystack(s, t).includes(q))) && (
+        <p className="no-results">No topics match “{query}”.</p>
+      )}
     </nav>
   );
 }

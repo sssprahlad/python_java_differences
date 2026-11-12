@@ -5,19 +5,20 @@ function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelected
   return (
     <div className="home-view">
       <div className="home-hero">
-        <h2>Master Python &amp; Java — Side by Side</h2>
+        <h2>Master Multiple Languages — Side by Side</h2>
         <p>
-          Every topic below compares <strong>Python</strong> and <strong>Java</strong> with simple
-          definitions and copy-paste code. Then dive into <strong>Django vs Spring Boot</strong>
-          for backend development. Search any topic, switch themes, and practise code in the
-          built-in playground.
+          Every topic below compares languages and frameworks head-to-head —
+          <strong> Python vs Java</strong>, <strong>Node.js vs Django vs Spring Boot</strong>,
+          <strong> React vs Angular vs Next.js vs TypeScript</strong>, <strong>CSS vs Tailwind</strong>,
+          key-value stores and databases. Search any topic, switch themes, and practise
+          code in the built-in playground.
         </p>
       </div>
 
       <div className="section-cards">
         {sections.map(({ section, topics }) => (
           <div className="section-card" key={section.id}>
-            <div className="section-card-header" style={{ background: `linear-gradient(135deg, ${section.id === 'django-spring' ? '#0c4b33' : section.id === 'database' ? '#4a3f8f' : '#1f4e79'}, #16202e)` }}>
+            <div className="section-card-header" style={{ background: `linear-gradient(135deg, ${section.color || (section.id === 'django-spring' ? '#0c4b33' : section.id === 'database' ? '#4a3f8f' : '#1f4e79')}, #16202e)` }}>
               <h3>{section.title}</h3>
               <p>{section.subtitle}</p>
             </div>

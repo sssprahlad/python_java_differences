@@ -1,0 +1,301 @@
+{
+  "section": {
+    "id": "python-frameworks",
+    "title": "Django vs Flask vs FastAPI — Python Frameworks",
+    "subtitle": "Batteries-included vs micro vs async — routing, requests, responses, templates, ORM, auth, validation, async and deployment.",
+    "color": "#0c4b33"
+  },
+  "columns": [
+    { "key": "django", "label": "Django", "color": "#0c4b33" },
+    { "key": "flask", "label": "Flask", "color": "#1f2937" },
+    { "key": "fastapi", "label": "FastAPI", "color": "#009688" }
+  ],
+  "topics": [
+    {
+      "id": "framework-style",
+      "title": "Framework Philosophy",
+      "learn": "Batteries-included vs micro-framework vs async-first.",
+      "django": {
+        "definition": "Django is batteries-included: ORM, admin, auth, forms, templates, migrations and security all built in. Opinionated structure (projects/apps) for large, structured apps.",
+        "code": "pip install django\ndjango-admin startproject mysite\npython manage.py startapp blog\n\n# You get: ORM, admin site, auth, CSRF,\n# migrations, templating — out of the box."
+      },
+      "flask": {
+        "definition": "Flask is a micro-framework: routing, request/response and Jinja2 templating only. You assemble everything else (ORM, auth, forms) from extensions — maximum flexibility.",
+        "code": "pip install flask\n\nfrom flask import Flask\napp = Flask(__name__)\n\n# You choose: SQLAlchemy, Flask-Login,\n# Flask-WTF, Celery… — glue it yourself."
+      },
+      "fastapi": {
+        "definition": "FastAPI is modern and async-first: automatic interactive docs, Pydantic validation, type hints as the API contract, and native async/await performance.",
+        "code": "pip install fastapi uvicorn\n\nfrom fastapi import FastAPI\napp = FastAPI()   # /docs UI auto-generated\n\n# Type hints drive validation + OpenAPI schema."
+      },
+      "resources": [
+        { "label": "Django docs", "url": "https://docs.djangoproject.com/" },
+        { "label": "Flask docs", "url": "https://flask.palletsprojects.com/" },
+        { "label": "FastAPI docs", "url": "https://fastapi.tiangolo.com/" }
+      ]
+    },
+    {
+      "id": "project-structure",
+      "title": "Project Structure",
+      "learn": "How each framework organises code.",
+      "django": {
+        "definition": "Fixed convention: a project (settings/urls/wsgi) containing apps, each with models.py, views.py, urls.py, admin.py, migrations/ — enforced layout.",
+        "code": "mysite/\n├── manage.py\n├── mysite/          # settings.py, urls.py, wsgi.py\n└── blog/            # an app\n    ├── models.py\n    ├── views.py\n    ├── urls.py\n    ├── admin.py\n    └── migrations/"
+      },
+      "flask": {
+        "definition": "No enforced structure — a single app.py works, or you grow into blueprints (modular route groups) with templates/ and static/ folders.",
+        "code": "myapp/\n├── app.py\n├── config.py\n├── models.py\n├── routes/          # or blueprints\n│   ├── auth.py\n│   └── api.py\n├── templates/\n└── static/\n\n# Factory pattern recommended for larger apps."
+      },
+      "fastapi": {
+        "definition": "Flexible layout — typically main.py plus routers/ modules for grouping endpoints. Depends on how you organise; no required conventions.",
+        "code": "app/\n├── main.py          # FastAPI() + include_router\n├── routers/\n│   ├── users.py\n│   └── items.py\n├── models.py       # Pydantic schemas\n├── database.py     # engine + session\n└── auth.py         # dependencies\n\n# Routers keep files focused."
+      },
+      "resources": [
+        { "label": "Django — Projects & apps", "url": "https://docs.djangoproject.com/en/stable/intro/tutorial01/" },
+        { "label": "Flask — Blueprints", "url": "https://flask.palletsprojects.com/en/stable/blueprints/" },
+        { "label": "FastAPI — Bigger apps", "url": "https://fastapi.tiangolo.com/tutorial/bigger-applications/" }
+      ]
+    },
+    {
+      "id": "routing",
+      "title": "Routing & URL Patterns",
+      "learn": "Mapping URLs to view functions.",
+      "django": {
+        "definition": "urls.py uses path()/re_path() with converters like <int:id>. URLconf includes app urlconfs hierarchically; views return HttpResponse.",
+        "code": "# blog/urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path('posts/<int:post_id>/', views.post_detail),\n    path('posts/', views.post_list),\n]\n\n# mysite/urls.py includes: path('blog/', include('blog.urls'))"
+      },
+      "flask": {
+        "definition": "Decorators (@app.route) bind URL patterns to functions directly — converters like <int:id> in the path string. Blueprints prefix groups of routes.",
+        "code": "from flask import Flask\napp = Flask(__name__)\n\n@app.route('/posts/<int:post_id>')\ndef post_detail(post_id):\n    return f'Post {post_id}'\n\n# Blueprint: bp = Blueprint('blog', __name__, url_prefix='/blog')"
+      },
+      "fastapi": {
+        "definition": "Decorators (@app.get/@app.post…) on async functions; path params typed via function signature. APIRouter groups endpoints with prefixes.",
+        "code": "from fastapi import APIRouter, Path\nrouter = APIRouter(prefix='/posts', tags=['posts'])\n\n@router.get('/{post_id}')\nasync def post_detail(post_id: int = Path(ge=1)):\n    return {'id': post_id}\n\n# main.py: app.include_router(router)"
+      },
+      "resources": [
+        { "label": "Django — URL dispatcher", "url": "https://docs.djangoproject.com/en/stable/topics/http/urls/" },
+        { "label": "Flask — Routing", "url": "https://flask.palletsprojects.com/en/stable/quickstart/#routing" },
+        { "label": "FastAPI — Path params", "url": "https://fastapi.tiangolo.com/tutorial/path-params/" }
+      ]
+    },
+    {
+      "id": "request-data",
+      "title": "Reading Request Data",
+      "learn": "Path params, query strings, JSON bodies, form data.",
+      "django": {
+        "definition": "request.GET for query params, request.POST for form data, request.body for raw body; json.loads(request.body) for JSON. CSRF enforced on POST.",
+        "code": "def create_post(request):\n    if request.method == 'POST':\n        # JSON body\n        data = json.loads(request.body)\n        title = data.get('title')\n        # form data\n        # title = request.POST.get('title')\n    # query: request.GET.get('page')"
+      },
+      "flask": {
+        "definition": "request.args (query), request.form (form), request.get_json() or request.json (JSON body), request.files for uploads.",
+        "code": "@app.route('/posts', methods=['POST'])\ndef create_post():\n    data = request.get_json()        # {'title': ...}\n    # query: request.args.get('page')\n    # form:  request.form.get('title')\n    # file:  request.files['img']"
+      },
+      "fastapi": {
+        "definition": "Parameters declared in the signature: path params, Query(...) defaults, and Pydantic models for the JSON body — parsed & validated automatically.",
+        "code": "from pydantic import BaseModel\n\nclass PostIn(BaseModel):\n    title: str\n    body: str | None = None\n\n@router.post('/posts')\nasync def create(\n    data: PostIn,                          # JSON body, validated\n    draft: bool = Query(False),           # ?draft=true\n    q: str = ''                           # ?q=search\n):\n    return data"
+      },
+      "resources": [
+        { "label": "Django — HttpRequest", "url": "https://docs.djangoproject.com/en/stable/ref/request-response/" },
+        { "label": "Flask — Request object", "url": "https://flask.palletsprojects.com/en/stable/api/#flask.Request" },
+        { "label": "FastAPI — Request body", "url": "https://fastapi.tiangolo.com/tutorial/body/" }
+      ]
+    },
+    {
+      "id": "responses-json",
+      "title": "Returning Responses & JSON",
+      "learn": "Sending data back to clients.",
+      "django": {
+        "definition": "JsonResponse(data) returns JSON; render(request, template) returns HTML; HttpResponse/redirect/status codes control the rest.",
+        "code": "from django.http import JsonResponse\n\ndef api_users(request):\n    return JsonResponse({'users': list(User.objects.values())})\n\ndef home(request):\n    return render(request, 'home.html', {'name': 'Alice'})\n\n# status: JsonResponse(data, status=201)"
+      },
+      "flask": {
+        "definition": "jsonify() serialises dicts/lists; render_template() for HTML; make_response/Response for headers, cookies and status codes.",
+        "code": "from flask import jsonify, render_template\n\n@app.route('/api/users')\ndef api_users():\n    return jsonify({'users': User.query.all()})\n\n@app.route('/')\ndef home():\n    resp = make_response(render_template('home.html'))\n    resp.set_cookie('theme', 'dark')\n    return resp  # status=201 also possible"
+      },
+      "fastapi": {
+        "definition": "Return Python dicts/lists/models directly — FastAPI serialises to JSON automatically. response_model validates outgoing shape; Response for custom headers/status.",
+        "code": "from fastapi.responses import JSONResponse\n\n@router.get('/users/{id}', response_model=UserOut)\nasync def get_user(id: int):\n    user = await db.get_user(id)\n    if not user:\n        return JSONResponse({'error': 'not found'}, status_code=404)\n    return user  # auto-serialised + validated"
+      },
+      "resources": [
+        { "label": "Django — JsonResponse", "url": "https://docs.djangoproject.com/en/stable/ref/request-response/" },
+        { "label": "Flask — jsonify", "url": "https://flask.palletsprojects.com/en/stable/api/#flask.jsonify" },
+        { "label": "FastAPI — Response models", "url": "https://fastapi.tiangolo.com/tutorial/response-model/" }
+      ]
+    },
+    {
+      "id": "templates-html",
+      "title": "Templates & Server-Rendered HTML",
+      "learn": "Rendering HTML pages.",
+      "django": {
+        "definition": "Django Templates is built in: {{ vars }}, {% tags %}, {% extends %} inheritance, automatic XSS escaping, template tags & filters.",
+        "code": "<!-- templates/blog/detail.html -->\n{% extends \"base.html\" %}\n{% block content %}\n<h1>{{ post.title }}</h1>\n<p>{{ post.body|truncatewords:30 }}</p>\n{% for c in post.comments.all %}\n  <p>{{ c.author }}: {{ c.text }}</p>\n{% endfor %}\n{% endblock %}"
+      },
+      "flask": {
+        "definition": "Jinja2 ships with Flask: {{ vars }}, {% for/if %}, template inheritance via {% extends %}/{% block %}, autoescaping for .html files.",
+        "code": "<!-- templates/post.html -->\n{% extends \"base.html\" %}\n{% block content %}\n<h1>{{ post.title }}</h1>\n{% for c in post.comments %}\n  <p>{{ c.author }}: {{ c.text }}</p>\n{% endfor %}\n{% endblock %}\n\n# render_template('post.html', post=post)"
+      },
+      "fastapi": {
+        "definition": "FastAPI doesn't ship HTML templating — use Jinja2Templates manually, or return JSON and let a frontend (React/Vue) render. API-first by design.",
+        "code": "from fastapi.templating import Jinja2Templates\ntemplates = Jinja2Templates(directory='templates')\n\n@router.get('/posts/{id}', response_class=HTMLResponse)\nasync def page(request: Request, id: int):\n    post = await db.get_post(id)\n    return templates.TemplateResponse('post.html', {\n        'request': request, 'post': post\n    })"
+      },
+      "resources": [
+        { "label": "Django Templates", "url": "https://docs.djangoproject.com/en/stable/topics/templates/" },
+        { "label": "Jinja2 docs", "url": "https://jinja.palletsprojects.com/" },
+        { "label": "FastAPI — Templates", "url": "https://fastapi.tiangolo.com/advanced/templates/" }
+      ]
+    },
+    {
+      "id": "orm-database",
+      "title": "ORM & Database Access",
+      "learn": "Talking to the database.",
+      "django": {
+        "definition": "Built-in ORM: models are Python classes; queries look like Python (objects.filter(...)); migrations auto-generated via makemigrations/migrate.",
+        "code": "# models.py\nclass Post(models.Model):\n    title = models.CharField(max_length=200)\n    author = models.ForeignKey(User, on_delete=models.CASCADE)\n\n# views.py\nposts = Post.objects.filter(author=user).order_by('-pub_date')[:5]\npost = Post.objects.get(id=1)\n\n# migrations\n# python manage.py makemigrations && migrate"
+      },
+      "flask": {
+        "definition": "No built-in ORM — use SQLAlchemy (via Flask-SQLAlchemy) for models, sessions and migrations (Flask-Migrate/Alembic), or raw sqlite3/psycopg.",
+        "code": "from flask_sqlalchemy import SQLAlchemy\ndb = SQLAlchemy(app)\n\nclass Post(db.Model):\n    id = db.Column(db.Integer, primary_key=True)\n    title = db.Column(db.String(200))\n\n# query\nposts = Post.query.filter_by(author_id=1).all()\n\n# migrations: flask db migrate && flask db upgrade"
+      },
+      "fastapi": {
+        "definition": "Choose your ORM: SQLAlchemy 2.0 (async supported), Tortoise ORM, or Beanie (MongoDB). SQLModel blends Pydantic + SQLAlchemy — popular for FastAPI.",
+        "code": "# SQLModel example\nclass Post(SQLModel, table=True):\n    id: int | None = Field(default=None, primary_key=True)\n    title: str\n\nasync def get_post(session, id):\n    return await session.get(Post, id)\n\n# raw SQL also easy via text() / asyncpg"
+      },
+      "resources": [
+        { "label": "Django ORM", "url": "https://docs.djangoproject.com/en/stable/topics/db/" },
+        { "label": "Flask-SQLAlchemy", "url": "https://flask-sqlalchemy.readthedocs.io/" },
+        { "label": "SQLModel", "url": "https://sqlmodel.tiangolo.com/" }
+      ]
+    },
+    {
+      "id": "auth-users",
+      "title": "Authentication & Users",
+      "learn": "Login, sessions and protected routes.",
+      "django": {
+        "definition": "Built-in auth system: User model, login/logout views, session auth, password hashing, @login_required decorator, groups & permissions.",
+        "code": "from django.contrib.auth import authenticate, login\nfrom django.contrib.auth.decorators import login_required\n\ndef signin(request):\n    user = authenticate(username=u, password=p)\n    if user: login(request, user)\n\n@login_required\ndef dashboard(request): ...\n\n# request.user available in every view"
+      },
+      "flask": {
+        "definition": "Via extensions: Flask-Login manages sessions & @login_required; Flask-JWT-Extended issues JWT tokens for APIs; Werkzeug handles password hashing.",
+        "code": "from flask_login import LoginManager, login_user, login_required\nfrom werkzeug.security import generate_password_hash\n\n@login_required\ndef dashboard(): ...\n\n# JWT alternative:\n# @jwt_required()\n# current_user = get_jwt_identity()"
+      },
+      "fastapi": {
+        "definition": "Security via dependencies: OAuth2PasswordBearer for JWT, passlib/bcrypt for hashing, and Depends() to inject the current user into endpoints.",
+        "code": "from fastapi.security import OAuth2PasswordBearer\nfrom jose import jwt\n\noauth2 = OAuth2PasswordBearer(tokenUrl='token')\n\nasync def current_user(token: str = Depends(oauth2)):\n    payload = jwt.decode(token, SECRET, algorithms=['HS256'])\n    return await db.get_user(payload['sub'])\n\n@router.get('/me')\nasync def me(user = Depends(current_user)):\n    return user"
+      },
+      "resources": [
+        { "label": "Django auth", "url": "https://docs.djangoproject.com/en/stable/topics/auth/" },
+        { "label": "Flask-Login", "url": "https://flask-login.readthedocs.io/" },
+        { "label": "FastAPI — Security", "url": "https://fastapi.tiangolo.com/tutorial/security/" }
+      ]
+    },
+    {
+      "id": "validation-input",
+      "title": "Input Validation",
+      "learn": "Checking that incoming data is correct.",
+      "django": {
+        "definition": "Forms (django.forms / ModelForm) validate POST data with field validators, clean() methods and is_valid(); DRF serializers do the same for APIs.",
+        "code": "class PostForm(forms.ModelForm):\n    class Meta:\n        model = Post\n        fields = ['title', 'body']\n    def clean_title(self):\n        t = self.cleaned_data['title']\n        if len(t) < 5: raise ValidationError('Too short')\n        return t\n\n# form.is_valid() → form.cleaned_data / form.errors"
+      },
+      "flask": {
+        "definition": "Manual checks or WTForms/Flask-WTF: form classes declare fields & validators; form.validate_on_submit() gates the view logic.",
+        "code": "from flask_wtf import FlaskForm\nfrom wtforms import StringField, validators\n\nclass PostForm(FlaskForm):\n    title = StringField('Title', [validators.Length(min=5)])\n    body = TextAreaField('Body')\n\n@app.route('/posts', methods=['POST'])\ndef create():\n    form = PostForm()\n    if form.validate_on_submit():\n        Post(title=form.title.data, body=form.body.data).save()"
+      },
+      "fastapi": {
+        "definition": "Pydantic models validate automatically — wrong types or missing fields return 422 with detailed errors before your code runs. Field() adds constraints.",
+        "code": "from pydantic import BaseModel, Field, EmailStr\n\nclass SignupIn(BaseModel):\n    email: EmailStr\n    password: str = Field(min_length=8)\n    age: int = Field(ge=0, le=120)\n\n@router.post('/signup')\nasync def signup(data: SignupIn):\n    # already validated — types guaranteed\n    ...\n\n# invalid input → automatic 422 response"
+      },
+      "resources": [
+        { "label": "Django Forms", "url": "https://docs.djangoproject.com/en/stable/topics/forms/" },
+        { "label": "Flask-WTF", "url": "https://flask-wtf.readthedocs.io/" },
+        { "label": "FastAPI — Pydantic", "url": "https://fastapi.tiangolo.com/tutorial/body/" }
+      ]
+    },
+    {
+      "id": "async-performance",
+      "title": "Async & Performance",
+      "learn": "Handling concurrent requests.",
+      "django": {
+        "definition": "Django is synchronous WSGI by default — one request blocks a worker thread. ASGI support exists (Django 3.0+) for async views, but the ORM is largely sync.",
+        "code": "# sync view (default)\ndef posts(request):\n    return JsonResponse({'posts': list(Post.objects.all())})\n\n# ASGI: uvicorn project.asgi:application\n# async views possible but ORM stays sync —\n# scale via multiple workers (gunicorn)"
+      },
+      "flask": {
+        "definition": "Flask is synchronous — each request occupies a thread. Async views exist (Flask 2.0+) for async libraries, but extensions often aren't async-ready.",
+        "code": "@app.route('/feed')\ndef feed():   # sync — blocks thread\n    data = requests.get('https://api.example.com').json()\n    return jsonify(data)\n\n# scale with gunicorn workers:\n# gunicorn -w 4 app:app\n# Flask 2.x: async def view() for aiohttp etc."
+      },
+      "fastapi": {
+        "definition": "FastAPI is async-native on ASGI (uvicorn): async def endpoints handle thousands of concurrent connections without thread-per-request overhead.",
+        "code": "@router.get('/feed')\nasync def feed():   # non-blocking\n    async with httpx.AsyncClient() as c:\n        r = await c.get('https://api.example.com')\n    return r.json()\n\n# one process handles many concurrent requests\n# uvicorn main:app --workers 4"
+      },
+      "resources": [
+        { "label": "Django — ASGI", "url": "https://docs.djangoproject.com/en/stable/howto/deployment/asgi/" },
+        { "label": "Flask — Async views", "url": "https://flask.palletsprojects.com/en/stable/async-await/" },
+        { "label": "FastAPI — Async", "url": "https://fastapi.tiangolo.com/async/" }
+      ]
+    },
+    {
+      "id": "middleware-deps",
+      "title": "Middleware & Dependencies",
+      "learn": "Cross-cutting logic: logging, auth, CORS, DB sessions.",
+      "django": {
+        "definition": "Middleware classes process every request/response in settings.MIDDLEWARE order. Decorators (@login_required) and context processors add per-view logic.",
+        "code": "# settings.py\nMIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'corsheaders.middleware.CorsMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    # ...\n]\n\n# custom: class MyMW: def __call__(self, request): ..."
+      },
+      "flask": {
+        "definition": "before_request/after_request decorators run around every request; @app.errorhandler catches exceptions; extensions plug in CORS, sessions.",
+        "code": "@app.before_request\ndef check_auth():\n    if request.endpoint in PROTECTED and 'user' not in session:\n        return redirect('/login')\n\n@app.after_request\ndef add_headers(resp):\n    resp.headers['X-Frame-Options'] = 'DENY'\n    return resp\n\n# CORS: flask_cors.CORS(app)"
+      },
+      "fastapi": {
+        "definition": "Depends() injects shared logic (DB sessions, current user, settings) into any endpoint; middleware via @app.middleware('http') wraps all requests.",
+        "code": "async def get_db():\n    async with Session() as s:\n        yield s   # dependency with cleanup\n\n@router.get('/users')\nasync def list_users(db = Depends(get_db)):\n    return await db.exec(select(User))\n\n@app.middleware('http')\nasync def log(req, call_next):\n    resp = await call_next(req)\n    print(req.url.path, resp.status_code)\n    return resp"
+      },
+      "resources": [
+        { "label": "Django — Middleware", "url": "https://docs.djangoproject.com/en/stable/topics/http/middleware/" },
+        { "label": "Flask — Request lifecycle", "url": "https://flask.palletsprojects.com/en/stable/quickstart/#about-requests" },
+        { "label": "FastAPI — Dependencies", "url": "https://fastapi.tiangolo.com/tutorial/dependencies/" }
+      ]
+    },
+    {
+      "id": "testing-deployment",
+      "title": "Testing & Deployment",
+      "learn": "Test frameworks and how each ships to production.",
+      "django": {
+        "definition": "Built-in test runner (unittest-style TestCase) with test client, fixtures and DB isolation. Deploy via gunicorn+nginx or PaaS; DEBUG=False in prod.",
+        "code": "# tests.py\nfrom django.test import TestCase, Client\n\nclass PostTests(TestCase):\n    def test_list(self):\n        r = Client().get('/posts/')\n        self.assertEqual(r.status_code, 200)\n\n# run: python manage.py test\n# deploy: gunicorn mysite.wsgi:application"
+      },
+      "flask": {
+        "definition": "pytest + pytest-flask or unittest; test_client simulates requests. Deploy with gunicorn/waitress behind nginx, Docker, or serverless.",
+        "code": "def test_home(client):\n    resp = client.get('/')\n    assert resp.status_code == 200\n\ndef test_create_post(client):\n    resp = client.post('/posts', json={'title': 'Hi'})\n    assert resp.status_code == 201\n\n# deploy: gunicorn -w 4 'app:app'"
+      },
+      "fastapi": {
+        "definition": "pytest + httpx AsyncClient/TestClient; dependency_overrides for mocking. Deploy with uvicorn/gunicorn workers, Docker, or serverless ASGI hosts.",
+        "code": "from fastapi.testclient import TestClient\nclient = TestClient(app)\n\ndef test_users():\n    r = client.get('/users')\n    assert r.status_code == 200\n\n# async variant: httpx.AsyncClient(transport=ASGITransport(app=app))\n# deploy: uvicorn main:app --workers 4"
+      },
+      "resources": [
+        { "label": "Django testing", "url": "https://docs.djangoproject.com/en/stable/topics/testing/" },
+        { "label": "Flask testing", "url": "https://flask.palletsprojects.com/en/stable/testing/" },
+        { "label": "FastAPI testing", "url": "https://fastapi.tiangolo.com/tutorial/testing/" }
+      ]
+    },
+    {
+      "id": "when-to-choose",
+      "title": "When to Choose Which",
+      "learn": "Decision guide for picking a framework.",
+      "django": {
+        "definition": "Choose Django for large content sites, admin-heavy apps, teams wanting convention over configuration, or when you need auth/admin/forms/ORM without assembling them.",
+        "code": "# Pick Django when:\n# - CMS, e-commerce, dashboards\n# - need admin panel out of the box\n# - team prefers explicit structure\n# - monolith with many built-in features\n# Examples: Instagram, Pinterest, Dropbox"
+      },
+      "flask": {
+        "definition": "Choose Flask for small APIs, prototypes, microservices, or when you want full control over every component. Great learning tool and for teams who like flexibility.",
+        "code": "# Pick Flask when:\n# - small/medium APIs & services\n# - microservices architecture\n# - you want to choose every library\n# - simple apps that don't need Django's weight\n# Examples: Netflix (historically), LinkedIn, Reddit (parts)"
+      },
+      "fastapi": {
+        "definition": "Choose FastAPI for modern async APIs, high-performance microservices, auto-generated docs (Swagger/Redoc), type-safe contracts, and ML/data backends.",
+        "code": "# Pick FastAPI when:\n# - async/high-throughput APIs\n# - auto docs for frontend teams\n# - Pydantic validation matters\n# - ML/AI services, data pipelines\n# Examples: Uber, Microsoft, Netflix (internal tools)"
+      },
+      "resources": [
+        { "label": "Django — Features", "url": "https://www.djangoproject.com/" },
+        { "label": "Flask — Pallets projects", "url": "https://palletsprojects.com/" },
+        { "label": "FastAPI — Features", "url": "https://fastapi.tiangolo.com/features/" }
+      ]
+    }
+  ]
+}

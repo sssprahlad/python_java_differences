@@ -23,47 +23,58 @@ async function getPyodide() {
   return pyodidePromise;
 }
 
-const PYTHONISH = /python|django/i;
+const RUNNABLE = /python|django|sqlite/i;
+const isRunnable = (label) => RUNNABLE.test(label);
 
 function Playground({ section, initialCode, initialLang, onClose }) {
-  const [leftCode, setLeftCode] = useState(initialCode || section.topics[0]?.python.code || '');
-  const [rightCode, setRightCode] = useState(section.topics[0]?.java.code || '');
-  const [activeTab, setActiveTab] = useState(initialLang === section.rightLabel ? 'right' : 'left');
+  const columns = section.columns || [];
+  const firstTopic = section.topics[0];
+
+  const [codes, setCodes] = useState(() => {
+    const init = {};
+    columns.forEach((c) => {
+      init[c.key] = firstTopic?.[c.key]?.code || '';
+    });
+    return init;
+  });
+  const [activeKey, setActiveKey] = useState(columns[0]?.key);
   const [output, setOutput] = useState('');
   const [running, setRunning] = useState(false);
-  const [loadingPyodide, setLoadingPyodide] = useState(false);
   const outputRef = useRef(null);
 
-  // Update codes when a new "Practice" click happens while open
+  const activeCol = columns.find((c) => c.key === activeKey) || columns[0];
+  const runnableCol = columns.find((c) => isRunnable(c.label));
+
+  // Update code when a new "Practice" click happens while open
   useEffect(() => {
     if (initialCode) {
-      if (initialLang === section.rightLabel) {
-        setRightCode(initialCode);
-        setActiveTab('right');
-      } else {
-        setLeftCode(initialCode);
-        setActiveTab('left');
+      const col = columns.find((c) => c.label === initialLang);
+      if (col) {
+        setCodes((prev) => ({ ...prev, [col.key]: initialCode }));
+        setActiveKey(col.key);
       }
     }
-  }, [initialCode, initialLang, section]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode, initialLang]);
 
   useEffect(() => {
     outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [output]);
 
   const runCode = async () => {
-    const isLeft = activeTab === 'left';
-    const langLabel = isLeft ? section.leftLabel : section.rightLabel;
-    const code = isLeft ? leftCode : rightCode;
+    const langLabel = activeCol.label;
+    const code = codes[activeKey] || '';
 
-    if (!PYTHONISH.test(langLabel) && !/sqlite/i.test(langLabel)) {
+    if (!isRunnable(langLabel)) {
       setOutput(
-        `ℹ️  "${langLabel}" code runs on a server/JVM, not in the browser.\n\n` +
+        `ℹ️  "${langLabel}" code can't run in the browser.\n\n` +
         `To practise it:\n` +
         `• Copy the code into your IDE / project\n` +
-        `• Run it locally (e.g. mvn spring-boot:run, python manage.py runserver)\n` +
-        `• Test the API endpoints with Postman\n\n` +
-        `For quick practice, switch to the ${section.leftLabel} tab — Python runs right here in your browser via Pyodide.`
+        `• Install the runtime (node, jdk, dotnet…) and run it locally\n` +
+        `• Test APIs with Postman or a browser\n\n` +
+        (runnableCol
+          ? `For quick in-browser practice, switch to the ${runnableCol.label} tab — it runs right here via Pyodide.`
+          : `Only runnable snippets are supported in the browser playground.`)
       );
       return;
     }
@@ -104,12 +115,8 @@ function Playground({ section, initialCode, initialLang, onClose }) {
       setOutput('❌ Error: ' + (err.message || err));
     } finally {
       setRunning(false);
-      setLoadingPyodide(false);
     }
   };
-
-  const leftIsPython = PYTHONISH.test(section.leftLabel) || /sqlite/i.test(section.leftLabel);
-  const rightIsPython = PYTHONISH.test(section.rightLabel) || /sqlite/i.test(section.rightLabel);
 
   return (
     <div className="playground-overlay" onClick={onClose}>
@@ -120,31 +127,27 @@ function Playground({ section, initialCode, initialLang, onClose }) {
         </div>
 
         <div className="pg-tabs">
-          <button
-            className={`pg-tab ${activeTab === 'left' ? 'active' : ''}`}
-            style={{ '--accent': section.leftColor }}
-            onClick={() => setActiveTab('left')}
-          >
-            {section.leftLabel} {leftIsPython ? '· runs in browser' : '· server-side'}
-          </button>
-          <button
-            className={`pg-tab ${activeTab === 'right' ? 'active' : ''}`}
-            style={{ '--accent': section.rightColor }}
-            onClick={() => setActiveTab('right')}
-          >
-            {section.rightLabel} {rightIsPython ? '· runs in browser' : '· server-side'}
-          </button>
+          {columns.map((col) => (
+            <button
+              key={col.key}
+              className={`pg-tab ${activeKey === col.key ? 'active' : ''}`}
+              style={{ '--accent': col.color }}
+              onClick={() => setActiveKey(col.key)}
+            >
+              {col.label} {isRunnable(col.label) ? '· runs in browser' : '· local only'}
+            </button>
+          ))}
         </div>
 
         <textarea
           className="pg-editor"
-          value={activeTab === 'left' ? leftCode : rightCode}
-          onChange={(e) => activeTab === 'left' ? setLeftCode(e.target.value) : setRightCode(e.target.value)}
+          value={codes[activeKey] || ''}
+          onChange={(e) => setCodes((prev) => ({ ...prev, [activeKey]: e.target.value }))}
           spellCheck="false"
         />
 
         <div className="pg-actions">
-          <button className="pg-run" onClick={runCode} disabled={running || loadingPyodide}>
+          <button className="pg-run" onClick={runCode} disabled={running}>
             {running ? 'Running…' : '▶ Run Code'}
           </button>
           <button
@@ -157,7 +160,7 @@ function Playground({ section, initialCode, initialLang, onClose }) {
 
         <div className="pg-output" ref={outputRef}>
           <div className="pg-output-label">Output</div>
-          <pre>{output || '// Click "Run Code" to execute (Python runs in-browser via Pyodide)'}</pre>
+          <pre>{output || '// Click "Run Code" to execute (Python/Django/SQLite run in-browser via Pyodide)'}</pre>
         </div>
       </div>
     </div>
