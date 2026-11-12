@@ -1,8 +1,11 @@
 import React from 'react';
 
-function Header({ query, onQueryChange, theme, onToggleTheme }) {
+function Header({ query, onQueryChange, theme, onToggleTheme, onToggleMenu }) {
   return (
     <header className="app-header">
+      <button className="menu-btn" onClick={onToggleMenu} aria-label="Toggle topics menu">
+        ☰
+      </button>
       <div className="header-brand">
         <span onClick={() => window.location.reload()} className="brand-icon">&lt;/&gt;</span>
         <div>

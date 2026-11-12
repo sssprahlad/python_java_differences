@@ -1,0 +1,184 @@
+{
+  "section": {
+    "id": "type-conversions",
+    "title": "Type Conversions — Python vs Java",
+    "subtitle": "Every way to convert between types: numbers, strings, booleans, chars, collections and safe parsing.",
+    "color": "#8b5cf6"
+  },
+  "columns": [
+    { "key": "python", "label": "Python", "color": "#3776ab" },
+    { "key": "java", "label": "Java", "color": "#b07219" }
+  ],
+  "topics": [
+    {
+      "id": "string-to-number",
+      "title": "String → Number",
+      "learn": "Parsing text into int or float.",
+      "python": {
+        "definition": "int() and float() convert strings to numbers. They raise ValueError on invalid input — wrap in try/except or validate first.",
+        "code": "s = \"42\"\nn = int(s)        # 42\nf = float(s)      # 42.0\n\n# safe parse\ntry:\n    n = int(\"abc\")\nexcept ValueError:\n    n = 0\n\n# strip whitespace first\nage = int(\" 25 \")   # works — int() ignores spaces"
+      },
+      "java": {
+        "definition": "Integer.parseInt(), Long.parseLong(), Double.parseDouble() parse strings. They throw NumberFormatException on bad input — catch it or validate.",
+        "code": "String s = \"42\";\nint n = Integer.parseInt(s);      // 42\ndouble f = Double.parseDouble(s);  // 42.0\n\n// safe parse\ntry {\n    n = Integer.parseInt(\"abc\");\n} catch (NumberFormatException e) {\n    n = 0;\n}\n\n// Integer.valueOf returns Integer object (nullable)\nInteger boxed = Integer.valueOf(\"42\");"
+      },
+      "resources": [
+        { "label": "Python — int()/float()", "url": "https://docs.python.org/3/library/functions.html#int" },
+        { "label": "Java — parseInt", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/Integer.html#parseInt-java.lang.String-" }
+      ]
+    },
+    {
+      "id": "number-to-string",
+      "title": "Number → String",
+      "learn": "Converting numbers back to text.",
+      "python": {
+        "definition": "str() converts any object to its string form. f-strings embed values directly into formatted text.",
+        "code": "n = 42\ns = str(n)              # '42'\nf = str(3.14)            # '3.14'\n\n# f-string formatting\nprint(f\"Value: {n}, Pi: {3.14159:.2f}\")\n# Value: 42, Pi: 3.14\n\n# format specifiers\nprint(f\"{255:#x}\")      # hex → 0xff"
+      },
+      "java": {
+        "definition": "String.valueOf() or concatenation with + converts numbers to strings. String.format() and text blocks give formatted output.",
+        "code": "int n = 42;\nString s = String.valueOf(n);   // \"42\"\nString t = n + \"\";              // \"42\"\n\n// formatted\nSystem.out.printf(\"Value: %d, Pi: %.2f%n\", n, 3.14159);\n// Value: 42, Pi: 3.14\n\n// hex\nSystem.out.println(String.format(\"%x\", 255));  // ff"
+      },
+      "resources": [
+        { "label": "Python — str() & f-strings", "url": "https://docs.python.org/3/library/stdtypes.html#str" },
+        { "label": "Java — String.format", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#format-java.lang.String-java.lang.Object...-" }
+      ]
+    },
+    {
+      "id": "char-conversions",
+      "title": "Character ↔ Number (ord / chr)",
+      "learn": "Converting between characters and their numeric codes.",
+      "python": {
+        "definition": "ord() returns the Unicode code point of a single character; chr() returns the character for a code point. Works for any Unicode character, not just ASCII.",
+        "code": "print(ord('A'))    # 65\nprint(ord('a'))    # 97\nprint(ord('€'))    # 8364 (Unicode!)\n\nprint(chr(65))     # 'A'\nprint(chr(97))     # 'a'\nprint(chr(8364))   # '€'\n\n# char arithmetic\nprint(chr(ord('A') + 1))  # 'B'"
+      },
+      "java": {
+        "definition": "char is a 16-bit UTF-16 code unit. Casting (int)'A' gives the code; (char)65 gives the character. For full Unicode use codePointAt/codePointBefore.",
+        "code": "System.out.println((int)'A');   // 65\nSystem.out.println((int)'a');   // 97\n\nSystem.out.println((char)65);   // 'A'\nSystem.out.println((char)97);   // 'a'\n\n// arithmetic\nchar next = (char)((int)'A' + 1);\nSystem.out.println(next);       // 'B'\n\n// full Unicode\nint cp = \"€\".codePointAt(0);   // 8364\nSystem.out.println(Character.toChars(cp)[0]);"
+      },
+      "resources": [
+        { "label": "Python — ord/chr", "url": "https://docs.python.org/3/library/functions.html#ord" },
+        { "label": "Java — char primitive", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" }
+      ]
+    },
+    {
+      "id": "boolean-conversions",
+      "title": "Boolean Conversions",
+      "learn": "Truthy/falsy values in each language.",
+      "python": {
+        "definition": "bool() converts any value to True/False. Falsy: None, 0, 0.0, '', [], {}, (). Everything else is truthy.",
+        "code": "print(bool(1))        # True\nprint(bool(0))        # False\nprint(bool(''))       # False\nprint(bool('hello'))  # True\nprint(bool([]))       # False\nprint(bool([1]))      # True\n\n# explicit checks\nif user_input:        # truthy check\n    process()\n\n# str ↔ bool\nprint(bool('True'))   # True (non-empty!)"
+      },
+      "java": {
+        "definition": "boolean is strictly true/false — no truthy/falsy concept. Boolean.parseBoolean() parses strings (only \"true\" ignoring case → true). Objects are never auto-converted.",
+        "code": "System.out.println(Boolean.parseBoolean(\"true\"));   // true\nSystem.out.println(Boolean.parseBoolean(\"TRUE\"));   // true\nSystem.out.println(Boolean.parseBoolean(\"yes\"));    // false!\nSystem.out.println(Boolean.parseBoolean(\"false\"));  // false\n\n// no truthiness — must compare explicitly\nif (name != null && !name.isEmpty()) { ... }\n\n// Boolean object\nBoolean boxed = Boolean.valueOf(\"true\");"
+      },
+      "resources": [
+        { "label": "Python — bool()", "url": "https://docs.python.org/3/library/functions.html#bool" },
+        { "label": "Java — Boolean.parseBoolean", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/Boolean.html#parseBoolean-java.lang.String-" }
+      ]
+    },
+    {
+      "id": "list-string",
+      "title": "List/Array ↔ String",
+      "learn": "Joining collections into text and splitting back.",
+      "python": {
+        "definition": "str.join() combines iterables with a separator; str.split() breaks text into lists. list(map(str, nums)) converts numbers first.",
+        "code": "words = ['Python', 'Java', 'Go']\ns = ', '.join(words)        # 'Python, Java, Go'\n\nnums = [1, 2, 3]\ns2 = '-'.join(map(str, nums)) # '1-2-3'\n\n# split back\nparts = 'a,b,c'.split(',')   # ['a','b','c']\nlines = text.splitlines()\n\n# str(list) is NOT join — gives repr\nprint(str([1,2]))   # '[1, 2]' not '12'"
+      },
+      "java": {
+        "definition": "String.join() combines CharSequence elements; String.split() uses regex. Arrays.stream().collect(joining()) works on streams and primitives via boxed types.",
+        "code": "List<String> words = List.of(\"Python\", \"Java\", \"Go\");\nString s = String.join(\", \", words);   // 'Python, Java, Go'\n\n// arrays & streams\nString[] arr = {\"a\", \"b\"};\nString joined = String.join(\"-\", arr);\n\n// split (regex!)\nString[] parts = \"a,b,c\".split(\",\");\n\n// numbers → string\nString nums = Arrays.stream(new int[]{1,2,3})\n    .mapToObj(String::valueOf).collect(Collectors.joining(\"-\"));"
+      },
+      "resources": [
+        { "label": "Python — str.join/split", "url": "https://docs.python.org/3/library/stdtypes.html#str.join" },
+        { "label": "Java — String.join", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/String.html#join-java.lang.CharSequence-java.lang.CharSequence...-" }
+      ]
+    },
+    {
+      "id": "widening-narrowing",
+      "title": "Widening & Narrowing (int ↔ long ↔ double)",
+      "learn": "Automatic vs explicit numeric conversions.",
+      "python": {
+        "definition": "Python has arbitrary-precision ints and one float type — no overflow, no explicit widening needed. int()/float() convert explicitly.",
+        "code": "i = 42\nf = float(i)     # 42.0 explicit\ni2 = int(3.99)   # 3 — TRUNCATES toward zero\n\n# no overflow ever\nbig = 10**100    # works fine\n\n# float→int loses decimals\nprint(int(-3.7)) # -3 (not floor!)\nprint(int(3.7))  # 3"
+      },
+      "java": {
+        "definition": "Java has fixed-size primitives: byte→short→int→long→float→double widen automatically (safe). Narrowing (double→int, long→int) requires explicit cast and may lose data.",
+        "code": "int i = 42;\nlong l = i;          // widening — automatic\ndouble d = i;      // widening — automatic\n\n// narrowing needs cast\nint back = (int) d;    // 42.0 → 42\nlong big = 3000000000L;\nint small = (int) big; // ⚠️ overflow!\n\ndouble pi = 3.99;\nint trunc = (int) pi;  // 3 — truncates"
+      },
+      "resources": [
+        { "label": "Python — Numeric types", "url": "https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex" },
+        { "label": "Java — Type conversions", "url": "https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html" }
+      ]
+    },
+    {
+      "id": "object-to-string",
+      "title": "Any Object → String",
+      "learn": "Stringifying arbitrary values.",
+      "python": {
+        "definition": "str() calls __str__() on any object — lists, dicts, custom classes all convert. repr() gives the developer/debug form.",
+        "code": "d = {'a': 1}\nprint(str(d))    # \"{'a': 1}\"\nprint(repr(d))   # \"{'a': 1}\" (same for dicts)\n\nclass Point:\n    def __str__(self): return f'({self.x},{self.y})'\n    def __repr__(self): return f'Point({self.x},{self.y})'\n\nprint(str(Point(1,2)))   # '(1,2)'\nprint(repr(Point(1,2)))  # 'Point(1,2)'"
+      },
+      "java": {
+        "definition": "String.valueOf(obj) or obj.toString() converts objects; StringBuilder/String.format for composition. Objects without toString() print class@hashcode.",
+        "code": "Object o = \"hello\";\nSystem.out.println(String.valueOf(o));  // hello\nSystem.out.println(o.toString());        // hello\n\n// null-safe\nSystem.out.println(String.valueOf(null)); // \"null\"\n// o.toString() on null → NullPointerException!\n\n// custom class\nclass Point {\n  public String toString() { return \"(\"+x+\",\"+y+\")\"; }\n}"
+      },
+      "resources": [
+        { "label": "Python — str/repr", "url": "https://docs.python.org/3/library/functions.html#repr" },
+        { "label": "Java — Object.toString", "url": "https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#toString--" }
+      ]
+    },
+    {
+      "id": "collection-conversions",
+      "title": "Collection ↔ Array / Other Collections",
+      "learn": "Converting between list, tuple, set, array.",
+      "python": {
+        "definition": "list(), tuple(), set() convert between built-in collections. No fixed-size arrays — lists are dynamic. array module exists for compact storage.",
+        "code": "t = (1, 2, 3)\nl = list(t)          # [1, 2, 3]\nt2 = tuple(l)       # (1, 2, 3)\ns = set(l)          # {1, 2, 3} — dedupes!\n\n# string ↔ list of chars\nchars = list(\"abc\")    # ['a','b','c']\nword = ''.join(chars)   # 'abc'\n\n# typed array (compact)\nimport array\narr = array.array('i', [1, 2, 3])  # 'i' = int"
+      },
+      "java": {
+        "definition": "Arrays.asList(), List.of(), new ArrayList<>(Arrays.asList(...)), and streams convert between arrays and collections. Primitive arrays need boxing (int[] ↔ List<Integer>).",
+        "code": "String[] arr = {\"a\", \"b\"};\nList<String> list = Arrays.asList(arr);          // fixed-size!\nList<String> copy = new ArrayList<>(list);       // mutable\n\n// collection → array\nString[] back = list.toArray(new String[0]);\n\n// primitives need boxing\nint[] nums = {1, 2, 3};\nList<Integer> boxed = Arrays.stream(nums).boxed().toList();"
+      },
+      "resources": [
+        { "label": "Python — list/tuple/set", "url": "https://docs.python.org/3/library/stdtypes.html" },
+        { "label": "Java — Arrays utility", "url": "https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html" }
+      ]
+    },
+    {
+      "id": "safe-parsing",
+      "title": "Safe Parsing & Type Checking",
+      "learn": "Avoiding crashes on bad input.",
+      "python": {
+        "definition": "isinstance() checks types; try/except ValueError guards parsing. Type hints (def f(x: int)) document but don't enforce at runtime.",
+        "code": "def process(x):\n    if isinstance(x, int):      # type check\n        return x * 2\n    return 0\n\n# safe int parse\ndef to_int(s):\n    try:\n        return int(s)\n    except (ValueError, TypeError):\n        return None\n\n# type hints (not enforced!)\ndef add(a: int, b: int) -> int:\n    return a + b\nadd(\"1\", 2)  # still works — Python is dynamic"
+      },
+      "java": {
+        "definition": "The compiler enforces types — wrong types won't compile. instanceof checks at runtime; try/catch NumberFormatException guards parsing; generics prevent collection type errors.",
+        "code": "// compile-time safety\nint n = \"42\";   // ❌ won't compile!\n\n// runtime check\nif (obj instanceof String) { ... }\n\n// safe parse\nstatic Integer toInt(String s) {\n    try { return Integer.parseInt(s); }\n    catch (NumberFormatException e) { return null; }\n}\n\n// pattern matching (Java 16+)\nif (obj instanceof String s) { s.length(); }"
+      },
+      "resources": [
+        { "label": "Python — isinstance", "url": "https://docs.python.org/3/library/functions.html#isinstance" },
+        { "label": "Java — instanceof", "url": "https://docs.oracle.com/javase/tutorial/java/javaOO/objectoriented.html" }
+      ]
+    },
+    {
+      "id": "bytes-string",
+      "title": "String ↔ Bytes",
+      "learn": "Text vs binary data conversion.",
+      "python": {
+        "definition": "str.encode() → bytes; bytes.decode() → str. Encoding matters — UTF-8 is the default and handles all Unicode.",
+        "code": "s = \"Hello \"\nb = s.encode('utf-8')      # b'Hello \\xe4\\xb8\\x96\\xe7\\x95\\x8c'\ns2 = b.decode('utf-8')      # 'Hello '\n\n# files\nwith open('f.txt', 'rb') as f:   # binary mode\n    data = f.read()               # bytes\ntext = data.decode('utf-8')\n\n# errors='ignore' skips bad bytes\nb.decode('utf-8', errors='ignore')"
+      },
+      "java": {
+        "definition": "String.getBytes() → byte[]; new String(bytes) decodes. StandardCharsets.UTF_8 is preferred over string charset names. Files use Files.readAllBytes/write.",
+        "code": "String s = \"Hello \";\nbyte[] b = s.getBytes(StandardCharsets.UTF_8);\nString s2 = new String(b, StandardCharsets.UTF_8);\n\n// files\nbyte[] data = Files.readAllBytes(Path.of(\"f.txt\"));\nString text = new String(data, StandardCharsets.UTF_8);\nFiles.write(Path.of(\"out.txt\"), text.getBytes(StandardCharsets.UTF_8));"
+      },
+      "resources": [
+        { "label": "Python — encode/decode", "url": "https://docs.python.org/3/library/stdtypes.html#bytes.decode" },
+        { "label": "Java — Charset", "url": "https://docs.oracle.com/javase/8/docs/api/java/nio/charset/Charset.html" }
+      ]
+    }
+  ]
+}

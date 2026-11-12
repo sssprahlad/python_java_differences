@@ -10,16 +10,17 @@ function Home({ sections, onOpenSection, onOpenTopic,selectedSection,setSelected
           Every topic below compares languages and frameworks head-to-head —
           <strong> Python vs Java</strong>, <strong>Node.js vs Django vs Spring Boot</strong>,
           <strong> React vs Angular vs Next.js vs TypeScript</strong>, <strong>CSS vs Tailwind</strong>,
-          key-value stores and databases. Search any topic, switch themes, and practise
+          key-value stores and databases. Follow the <strong>numbered steps</strong> from
+          basics to advanced — or jump anywhere using search. Switch themes and practise
           code in the built-in playground.
         </p>
       </div>
 
       <div className="section-cards">
-        {sections.map(({ section, topics }) => (
+        {sections.map(({ section, topics }, idx) => (
           <div className="section-card" key={section.id}>
             <div className="section-card-header" style={{ background: `linear-gradient(135deg, ${section.color || (section.id === 'django-spring' ? '#0c4b33' : section.id === 'database' ? '#4a3f8f' : '#1f4e79')}, #16202e)` }}>
-              <h3>{section.title}</h3>
+              <h3><span className="step-num">{idx + 1}</span> {section.title}</h3>
               <p>{section.subtitle}</p>
             </div>
             <div className="section-card-body">

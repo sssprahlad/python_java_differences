@@ -22,6 +22,7 @@ import keyValueData from './data/keyvalue.json';
 import sqliteMongooseData from './data/sqlite-mongoose.json';
 import pythonFrameworksData from './data/python-frameworks.json';
 import gitCommandsData from './data/git-commands.json';
+import typeConversionsData from './data/type-conversions.json';
 
 // Normalize every section to expose a `columns` array:
 // [{ key, label, color }] — legacy files derive it from leftLabel/rightLabel
@@ -34,11 +35,25 @@ const normalizeSection = (raw) => ({
   ],
 });
 
+// Ordered as a learning path: fundamentals → advanced → deep dives →
+// databases → backend ecosystems → frontend → tooling.
 const SECTIONS = [
-  basicsData, advancedData, databaseData, djangoSpringData,
-  javaCoreA, javaCoreB, springAnnotations,
-  nodeJsData, backend3Data, frontendData, cssTailwindData, keyValueData, sqliteMongooseData,
-  pythonFrameworksData, gitCommandsData,
+  basicsData,            // 1. Python vs Java — Basics
+  typeConversionsData,   // 2. Type Conversions
+  advancedData,          // 3. Python vs Java — Advanced
+  javaCoreA,             // 4. Java Core — JVM, Types & Syntax
+  javaCoreB,             // 5. Java Core — OOP, Collections & Concurrency
+  databaseData,          // 6. Database — SQL vs JDBC
+  sqliteMongooseData,    // 7. SQLite3 vs Mongoose
+  keyValueData,          // 8. Key-Value Data Concepts
+  nodeJsData,            // 9. Node.js vs Python
+  pythonFrameworksData,  // 10. Django vs Flask vs FastAPI
+  djangoSpringData,      // 11. Django vs Spring Boot
+  backend3Data,          // 12. Node.js vs Django vs Spring Boot
+  springAnnotations,     // 13. Spring Boot — All Annotations
+  frontendData,          // 14. React vs Angular vs Next.js vs TypeScript
+  cssTailwindData,       // 15. CSS vs Tailwind CSS
+  gitCommandsData,       // 16. Git Commands — Cheat Sheet
 ].map(normalizeSection);
 
 function App() {
@@ -48,6 +63,7 @@ function App() {
   const [activeTopicId, setActiveTopicId] = useState(null);
   const [playground, setPlayground] = useState(null); // { section, code, lang }
   const [selectedSection, setSelectedSection] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const activeSection = useMemo(
     () => SECTIONS.find((s) => s.section.id === activeSectionId) || null,
@@ -84,6 +100,7 @@ function App() {
         onQueryChange={setQuery}
         theme={theme}
         onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        onToggleMenu={() => setMenuOpen((o) => !o)}
       />
 
       <div className="app-body">
@@ -94,7 +111,10 @@ function App() {
           activeTopicId={activeTopicId}
           onSelectTopic={openTopic}
           onSelectSection={openSection}
+          mobileOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
         />
+        {menuOpen && <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)} />}
 
         <main className="main-content">
           {activeTopic && activeSection ? (

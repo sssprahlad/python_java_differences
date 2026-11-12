@@ -9,12 +9,21 @@ function topicHaystack(section, topic) {
   return text;
 }
 
-function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopic, onSelectSection }) {
+function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopic, onSelectSection, mobileOpen, onClose }) {
   const q = query.trim().toLowerCase();
 
+  const handleSelectTopic = (sectionId, topicId) => {
+    onSelectTopic(sectionId, topicId);
+    onClose?.();
+  };
+  const handleSelectSection = (sectionId) => {
+    onSelectSection(sectionId);
+    onClose?.();
+  };
+
   return (
-    <nav className="sidebar">
-      {sections.map((section) => {
+    <nav className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
+      {sections.map((section, idx) => {
         const filteredTopics = q
           ? section.topics.filter((t) => topicHaystack(section, t).includes(q))
           : section.topics;
@@ -25,8 +34,9 @@ function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopi
           <div className="sidebar-section" key={section.section.id}>
             <button
               className={`sidebar-section-title ${activeSectionId === section.section.id && !activeTopicId ? 'active' : ''}`}
-              onClick={() => onSelectSection(section.section.id)}
+              onClick={() => handleSelectSection(section.section.id)}
             >
+              <span className="step-num">{idx + 1}</span>
               {section.section.title}
               <span className="topic-count">{filteredTopics.length}</span>
             </button>
@@ -35,7 +45,7 @@ function Sidebar({ sections, query, activeSectionId, activeTopicId, onSelectTopi
                 <li key={topic.id}>
                   <button
                     className={`sidebar-topic ${activeTopicId === topic.id ? 'active' : ''}`}
-                    onClick={() => onSelectTopic(section.section.id, topic.id)}
+                    onClick={() => handleSelectTopic(section.section.id, topic.id)}
                   >
                     {topic.title}
                   </button>
